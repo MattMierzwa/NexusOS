@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebOS 2.0 HD</title>
+    <title>NexusOS - Fullscreen Update</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -12,109 +13,96 @@
     <!-- TELA DE BOOT -->
     <div id="boot-screen">
         <div class="boot-content">
-            <div class="logo-animation">
-                <i class="fa-brands fa-windows"></i>
-            </div>
-            <h1>WebOS</h1>
-            <div class="loader-bar">
-                <div class="loader-progress"></div>
-            </div>
-            <p>Iniciando sistema...</p>
-            <!-- Botão removido -->
+            <svg class="nexus-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#6a11cb;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#2575fc;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <path d="M50 5 L90 25 L90 75 L50 95 L10 75 L10 25 Z" fill="none" stroke="url(#grad1)" stroke-width="4" />
+                <circle cx="50" cy="50" r="15" fill="url(#grad1)" />
+                <path d="M50 20 L50 35 M50 65 L50 80 M25 35 L38 42 M62 58 L75 65 M25 65 L38 58 M62 42 L75 35" stroke="white" stroke-width="3" stroke-linecap="round" />
+            </svg>
+            <h1>NexusOS</h1>
+            <div class="loader-bar"><div class="loader-progress"></div></div>
+            <p>Inicializando Núcleo...</p>
         </div>
     </div>
 
     <!-- DESKTOP -->
     <div id="desktop">
-        <div class="desktop-icon" onclick="openApp('explorer')">
-            <i class="fa-solid fa-folder-open" style="color: #ffd700;"></i>
-            <span>Arquivos</span>
-        </div>
-        <div class="desktop-icon" onclick="openApp('browser')">
-            <i class="fa-brands fa-chrome" style="color: #ea4335;"></i>
-            <span>WikiBrowser</span>
-        </div>
-        <div class="desktop-icon" onclick="openApp('notepad')">
-            <i class="fa-solid fa-file-lines" style="color: #fff;"></i>
-            <span>Notas</span>
-        </div>
-        <div class="desktop-icon" onclick="openApp('todo')">
-            <i class="fa-solid fa-list-check" style="color: #9ece6a;"></i>
-            <span>Tarefas</span>
-        </div>
-        <div class="desktop-icon" onclick="openApp('tictactoe')">
-            <i class="fa-solid fa-gamepad" style="color: #bb9af7;"></i>
-            <span>Jogo</span>
-        </div>
-        <div class="desktop-icon" onclick="openApp('monitor')">
-            <i class="fa-solid fa-chart-line" style="color: #f7768e;"></i>
-            <span>Monitor</span>
-        </div>
-        <div class="desktop-icon" onclick="openApp('settings')">
-            <i class="fa-solid fa-gear" style="color: #acadb9;"></i>
-            <span>Ajustes</span>
-        </div>
-        <div class="desktop-icon" onclick="openApp('terminal')">
-            <i class="fa-solid fa-terminal" style="color: #7aa2f7;"></i>
-            <span>Terminal</span>
-        </div>
+        <div class="desktop-icon" onclick="openApp('explorer')"><i class="fa-solid fa-folder-tree" style="color: #ffd700;"></i><span>Explorador</span></div>
+        <div class="desktop-icon" onclick="openApp('browser')"><i class="fa-solid fa-globe" style="color: #00d2ff;"></i><span>Navegador</span></div>
+        <div class="desktop-icon" onclick="openApp('notepad')"><i class="fa-solid fa-pen-nib" style="color: #fff;"></i><span>Editor</span></div>
+        <div class="desktop-icon" onclick="openApp('todo')"><i class="fa-solid fa-check-double" style="color: #00f260;"></i><span>Tarefas</span></div>
+        <div class="desktop-icon" onclick="openApp('calendar')"><i class="fa-solid fa-calendar-alt" style="color: #ff416c;"></i><span>Agenda</span></div>
+        <div class="desktop-icon" onclick="openApp('store')"><i class="fa-solid fa-store" style="color: #8e2de2;"></i><span>Loja</span></div>
+        <div class="desktop-icon" onclick="openApp('terminal')"><i class="fa-solid fa-code" style="color: #00c6ff;"></i><span>Terminal</span></div>
+        <div class="desktop-icon" onclick="openApp('settings')"><i class="fa-solid fa-sliders-h" style="color: #acadb9;"></i><span>Sistema</span></div>
     </div>
 
     <!-- MENU INICIAR -->
     <div id="start-menu" class="hidden">
         <div class="start-header">
             <div class="user-profile">
-                <i class="fa-solid fa-user-circle"></i>
-                <span>Admin</span>
+                <div class="avatar-circle">N</div>
+                <span>Usuário Nexus</span>
             </div>
         </div>
         <div class="start-apps">
-            <div class="start-item" onclick="openApp('explorer'); toggleStartMenu()"><i class="fa-solid fa-folder"></i> Arquivos</div>
-            <div class="start-item" onclick="openApp('browser'); toggleStartMenu()"><i class="fa-brands fa-chrome"></i> WikiBrowser</div>
-            <div class="start-item" onclick="openApp('notepad'); toggleStartMenu()"><i class="fa-solid fa-file-lines"></i> Bloco de Notas</div>
-            <div class="start-item" onclick="openApp('todo'); toggleStartMenu()"><i class="fa-solid fa-list-check"></i> Tarefas</div>
-            <div class="start-item" onclick="openApp('calculator'); toggleStartMenu()"><i class="fa-solid fa-calculator"></i> Calculadora</div>
-            <div class="start-item" onclick="openApp('tictactoe'); toggleStartMenu()"><i class="fa-solid fa-gamepad"></i> Jogo da Velha</div>
-            <div class="start-item" onclick="openApp('monitor'); toggleStartMenu()"><i class="fa-solid fa-chart-line"></i> Monitor</div>
-            <div class="start-item" onclick="openApp('settings'); toggleStartMenu()"><i class="fa-solid fa-gear"></i> Ajustes</div>
-            <div class="start-item" onclick="openApp('terminal'); toggleStartMenu()"><i class="fa-solid fa-terminal"></i> Terminal</div>
+            <div class="start-item" onclick="openApp('explorer'); toggleStartMenu()"><i class="fa-solid fa-folder-tree"></i> Explorador</div>
+            <div class="start-item" onclick="openApp('browser'); toggleStartMenu()"><i class="fa-solid fa-globe"></i> Navegador</div>
+            <div class="start-item" onclick="openApp('notepad'); toggleStartMenu()"><i class="fa-solid fa-pen-nib"></i> Editor</div>
+            <div class="start-item" onclick="openApp('todo'); toggleStartMenu()"><i class="fa-solid fa-check-double"></i> Tarefas</div>
+            <div class="start-item" onclick="openApp('calendar'); toggleStartMenu()"><i class="fa-solid fa-calendar-alt"></i> Agenda</div>
+            <div class="start-item" onclick="openApp('store'); toggleStartMenu()"><i class="fa-solid fa-store"></i> Loja</div>
+            <div class="start-item" onclick="openApp('terminal'); toggleStartMenu()"><i class="fa-solid fa-code"></i> Terminal</div>
+            <div class="start-item" onclick="openApp('settings'); toggleStartMenu()"><i class="fa-solid fa-sliders-h"></i> Sistema</div>
         </div>
         <div class="start-footer">
             <button onclick="location.reload()"><i class="fa-solid fa-power-off"></i> Reiniciar</button>
         </div>
     </div>
 
-    <!-- BARRA DE TAREFAS (Sem controle de volume) -->
+    <!-- BARRA DE TAREFAS -->
     <div id="taskbar">
-        <div id="start-btn" onclick="toggleStartMenu()"><i class="fa-brands fa-windows"></i></div>
+        <div id="start-btn" onclick="toggleStartMenu()">
+            <svg width="24" height="24" viewBox="0 0 100 100">
+                <path d="M50 10 L85 30 L85 70 L50 90 L15 70 L15 30 Z" fill="var(--accent-color)" stroke="white" stroke-width="5"/>
+            </svg>
+        </div>
         <div id="taskbar-apps"></div>
         <div id="system-tray">
+            <div id="volume-btn" onclick="toggleMute()" title="Silenciar/Ativar Som">
+                <i class="fa-solid fa-volume-high" id="vol-icon"></i>
+            </div>
             <div id="clock">
-                <span id="time">00:00</span>
-                <span id="date">01/01</span>
+                <div id="time">00:00</div>
+                <div id="date">01/01</div>
             </div>
         </div>
     </div>
 
-    <!-- NOTIFICAÇÕES -->
     <div id="notification-container"></div>
 
     <!-- MENU DE CONTEXTO -->
     <div id="context-menu" class="hidden">
-        <div class="ctx-item" onclick="refreshDesktop()"><i class="fa-solid fa-rotate-right"></i> Atualizar</div>
+        <div class="ctx-item" onclick="refreshDesktop()"><i class="fa-solid fa-sync"></i> Atualizar</div>
         <div class="ctx-divider"></div>
-        <div class="ctx-item" onclick="openApp('settings')"><i class="fa-solid fa-image"></i> Papel de Parede</div>
-        <div class="ctx-item" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i> Alternar Tema</div>
+        <div class="ctx-item" onclick="openApp('settings')"><i class="fa-solid fa-image"></i> Personalização</div>
+        <div class="ctx-item" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i> Modo Noturno</div>
         <div class="ctx-divider"></div>
-        <div class="ctx-item" onclick="openApp('terminal')"><i class="fa-solid fa-terminal"></i> Abrir Terminal</div>
+        <div class="ctx-item" onclick="openApp('terminal')"><i class="fa-solid fa-terminal"></i> Console</div>
     </div>
 
-    <!-- TEMPLATES (Mantidos iguais aos anteriores) -->
+    <!-- TEMPLATES COM BOTÃO MAXIMIZAR ADICIONADO -->
+    
     <template id="tpl-explorer">
         <div class="window-content explorer-layout">
             <div class="explorer-sidebar">
-                <div class="sidebar-item" onclick="renderFiles('/')"><i class="fa-solid fa-house"></i> Home</div>
-                <div class="sidebar-item" onclick="createNewFilePrompt()"><i class="fa-solid fa-plus"></i> Novo Arquivo</div>
+                <div class="sidebar-item" onclick="renderFiles('/')"><i class="fa-solid fa-home"></i> Início</div>
+                <div class="sidebar-item" onclick="createNewFilePrompt()"><i class="fa-solid fa-plus-circle"></i> Novo Arquivo</div>
             </div>
             <div class="explorer-main"></div>
         </div>
@@ -125,16 +113,16 @@
             <div class="browser-bar">
                 <button onclick="navWiki('back')"><i class="fa-solid fa-arrow-left"></i></button>
                 <button onclick="navWiki('fwd')"><i class="fa-solid fa-arrow-right"></i></button>
-                <input type="text" value="https://pt.wikipedia.org/wiki/Página_principal" readonly>
-                <button onclick="navWiki('refresh')"><i class="fa-solid fa-rotate-right"></i></button>
+                <input type="text" value="https://pt.wikipedia.org" readonly>
+                <button onclick="navWiki('refresh')"><i class="fa-solid fa-redo"></i></button>
             </div>
-            <iframe src="https://pt.m.wikipedia.org/wiki/Página_principal" id="wiki-frame"></iframe>
+            <iframe src="https://pt.m.wikipedia.org" id="wiki-frame"></iframe>
         </div>
     </template>
 
     <template id="tpl-notepad">
         <div class="window-content notepad-layout">
-            <textarea id="notepad-area" placeholder="Digite algo..."></textarea>
+            <textarea id="notepad-area" placeholder="Escreva seu código ou texto..."></textarea>
             <div class="notepad-controls">
                 <button onclick="saveNotepadContent(this)">Salvar</button>
                 <span id="notepad-status">Pronto</span>
@@ -169,7 +157,7 @@
         <div class="window-content tictactoe-layout">
             <div class="game-status">Vez de: <span id="ttt-turn">X</span></div>
             <div class="game-board" id="ttt-board"></div>
-            <button class="reset-game" onclick="initTicTacToe()">Reiniciar Jogo</button>
+            <button class="reset-game" onclick="initTicTacToe()">Reiniciar</button>
         </div>
     </template>
 
@@ -195,26 +183,57 @@
 
     <template id="tpl-settings">
         <div class="window-content settings-layout">
-            <h3>Personalização</h3>
-            <div class="setting-group">
-                <label>Tema:</label>
-                <button onclick="toggleTheme()">Alternar Claro/Escuro</button>
+            <div class="settings-tabs">
+                <button class="tab-btn active" onclick="switchTab('visual')"><i class="fa-solid fa-paintbrush"></i> Visual</button>
+                <button class="tab-btn" onclick="switchTab('system')"><i class="fa-solid fa-microchip"></i> Sistema</button>
             </div>
-            <div class="setting-group">
-                <label>Papel de Parede (HD):</label>
-                <div class="wallpaper-grid">
-                    <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1477346611705-65d1883cee1e?q=80&w=300')" 
-                         data-hd="https://images.unsplash.com/photo-1477346611705-65d1883cee1e?q=80&w=1920&auto=format&fit=crop" 
-                         onclick="setWallpaperHD(this)"></div>
-                    <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=300')" 
-                         data-hd="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1920&auto=format&fit=crop" 
-                         onclick="setWallpaperHD(this)"></div>
-                    <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=300')" 
-                         data-hd="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1920&auto=format&fit=crop" 
-                         onclick="setWallpaperHD(this)"></div>
-                    <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300')" 
-                         data-hd="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop" 
-                         onclick="setWallpaperHD(this)"></div>
+            <div id="tab-visual" class="tab-content active">
+                <div class="setting-group">
+                    <label>Tema Base:</label>
+                    <button onclick="toggleTheme()" class="full-width-btn"><i class="fa-solid fa-adjust"></i> Alternar Claro / Escuro</button>
+                </div>
+                <div class="setting-group">
+                    <label>Cor de Destaque (Accent):</label>
+                    <div class="color-picker-grid">
+                        <div class="color-option" style="background: #7aa2f7;" onclick="setAccentColor('#7aa2f7', '#2575fc')"></div>
+                        <div class="color-option" style="background: #bb9af7;" onclick="setAccentColor('#bb9af7', '#8e2de2')"></div>
+                        <div class="color-option" style="background: #9ece6a;" onclick="setAccentColor('#9ece6a', '#00b09b')"></div>
+                        <div class="color-option" style="background: #f7768e;" onclick="setAccentColor('#f7768e', '#ff416c')"></div>
+                        <div class="color-option" style="background: #e0af68;" onclick="setAccentColor('#e0af68', '#f2994a')"></div>
+                        <div class="color-option" style="background: #00d2ff;" onclick="setAccentColor('#00d2ff', '#3a7bd5')"></div>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label>Transparência das Janelas:</label>
+                    <input type="range" min="0.5" max="1" step="0.05" value="0.85" id="opacity-slider" oninput="setWindowOpacity(this.value)" style="width:100%">
+                    <small id="opacity-value" style="opacity:0.7; font-size:11px;">85%</small>
+                </div>
+                <div class="setting-group">
+                    <label>Papel de Parede:</label>
+                    <div class="wallpaper-grid">
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=300')" data-src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300')" data-src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=300')" data-src="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1477346611705-65d1883cee1e?q=80&w=300')" data-src="https://images.unsplash.com/photo-1477346611705-65d1883cee1e?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=300')" data-src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=300')" data-src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=300')" data-src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1531297461136-82007553d941?q=80&w=300')" data-src="https://images.unsplash.com/photo-1531297461136-82007553d941?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="tab-system" class="tab-content">
+                <div class="setting-group">
+                    <label>Informações do Sistema:</label>
+                    <div class="sys-info">
+                        <p><strong>OS:</strong> NexusOS v2.2</p>
+                        <p><strong>Kernel:</strong> WebKit Hybrid</p>
+                        <p><strong>Memória:</strong> Virtualizada</p>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label>Ações:</label>
+                    <button onclick="location.reload()" class="full-width-btn danger-btn"><i class="fa-solid fa-power-off"></i> Reiniciar Sistema</button>
                 </div>
             </div>
         </div>
@@ -224,8 +243,42 @@
         <div class="window-content terminal-layout" onclick="refocusTerminal(this)">
             <div class="terminal-output"></div>
             <div class="terminal-input-line">
-                <span class="prompt">user@webos:~$</span>
+                <span class="prompt">nexus@root:~$</span>
                 <input type="text" class="term-input" autocomplete="off" spellcheck="false">
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-store">
+        <div class="window-content store-layout">
+            <div class="store-header">
+                <h2><i class="fa-solid fa-store"></i> App Store</h2>
+                <p>Expanda seu NexusOS</p>
+            </div>
+            <div class="store-grid" id="store-list"></div>
+        </div>
+    </template>
+
+    <template id="tpl-calendar">
+        <div class="window-content calendar-layout">
+            <div class="cal-header">
+                <button onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                <h3 id="cal-month-year">Mês Ano</h3>
+                <button onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <div class="cal-weekdays">
+                <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+            </div>
+            <div class="cal-days" id="cal-days-grid"></div>
+            <div id="event-modal" class="hidden">
+                <div class="modal-content">
+                    <h4 id="modal-date-title">Data</h4>
+                    <textarea id="event-note" placeholder="Lembrete..."></textarea>
+                    <div class="modal-actions">
+                        <button onclick="saveEvent()" class="btn-save">Salvar</button>
+                        <button onclick="closeEventModal()" class="btn-cancel">Cancelar</button>
+                    </div>
+                </div>
             </div>
         </div>
     </template>
