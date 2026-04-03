@@ -21,9 +21,48 @@ function toggleMute() {
 }
 
 /* --- ESTADO DO SISTEMA --- */
-const systemState = { windows: [], zIndexCounter: 100, fileSystem: {}, todos: [], theme: 'dark', wallpaperSrc: '', accentColor: '#7aa2f7', accentGradient: 'linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)', windowOpacity: 0.85, events: {} };
+const systemState = { 
+    windows: [], zIndexCounter: 100, 
+    fileSystem: {}, trash: {}, // Lixeira adicionada
+    todos: [], theme: 'dark', wallpaperSrc: '', 
+    accentColor: '#7aa2f7', accentGradient: 'linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)', 
+    windowOpacity: 0.85, events: {} 
+};
 
-document.addEventListener('DOMContentLoaded', () => { loadSystemData(); startBootSequence(); });
+// Dados para Task Manager Simulado
+const mockProcesses = [
+    { name: 'nexus_kernel', cpu: 2.5, mem: 120 },
+    { name: 'window_manager', cpu: 1.2, mem: 85 },
+    { name: 'audio_service', cpu: 0.5, mem: 40 },
+    { name: 'network_daemon', cpu: 0.8, mem: 30 },
+    { name: 'file_explorer', cpu: 0.0, mem: 60 },
+    { name: 'browser_engine', cpu: 15.0, mem: 450 },
+    { name: 'sys_monitor', cpu: 1.0, mem: 25 }
+];
+
+// Histórico para gráficos
+let cpuHistory = new Array(50).fill(0);
+let ramHistory = new Array(50).fill(0);
+
+document.addEventListener('DOMContentLoaded', () => { loadSystemData(); startBootSequence(); setupShortcuts(); });
+
+function setupShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        // Win + D (Mostrar Desktop)
+        if (e.key === 'd' && e.metaKey) {
+            e.preventDefault();
+            systemState.windows.forEach(w => minimizeWindow(w.id));
+        }
+        // Alt + Tab (Focar próxima janela) - Simplificado
+        if (e.key === 'Tab' && e.altKey) {
+            e.preventDefault();
+            if(systemState.windows.length > 0) {
+                const nextWin = systemState.windows.find(w => !w.minimized) || systemState.windows[0];
+                if(nextWin) focusWindow(nextWin.id);
+            }
+        }
+    });
+}
 
 function startBootSequence() {
     const progress = document.querySelector('.loader-progress');
@@ -43,6 +82,9 @@ function loadSystemData() {
     const storedFiles = localStorage.getItem('webos_files');
     systemState.fileSystem = storedFiles ? JSON.parse(storedFiles) : { "leia-me.txt": "Bem-vindo ao NexusOS." };
     
+    const storedTrash = localStorage.getItem('webos_trash');
+    systemState.trash = storedTrash ? JSON.parse(storedTrash) : {};
+
     const storedTodos = localStorage.getItem('webos_todos');
     systemState.todos = storedTodos ? JSON.parse(storedTodos) : [];
 
@@ -53,34 +95,24 @@ function loadSystemData() {
     if (storedTheme) { systemState.theme = storedTheme; document.body.className = `theme-${storedTheme}`; }
     
     const storedWpSrc = localStorage.getItem('nexus_wp_src');
-    if (storedWpSrc) {
-        document.body.style.backgroundImage = `url('${storedWpSrc}')`;
-        systemState.wallpaperSrc = storedWpSrc;
-    }
+    if (storedWpSrc) { document.body.style.backgroundImage = `url('${storedWpSrc}')`; systemState.wallpaperSrc = storedWpSrc; }
 
     const storedAccent = localStorage.getItem('nexus_accent_color');
     const storedGradient = localStorage.getItem('nexus_accent_gradient');
     const storedOpacity = localStorage.getItem('nexus_window_opacity');
 
     if (storedAccent && storedGradient) setAccentColor(storedAccent, storedGradient, false);
-    if (storedOpacity) {
-        setWindowOpacity(storedOpacity, false);
-        const slider = document.getElementById('opacity-slider');
-        if(slider) slider.value = storedOpacity;
-    }
+    if (storedOpacity) { setWindowOpacity(storedOpacity, false); const slider = document.getElementById('opacity-slider'); if(slider) slider.value = storedOpacity; }
 
     const isMuted = localStorage.getItem('nexus_muted') === 'true';
-    if (isMuted) {
-        SoundEngine.muted = true;
-        const icon = document.getElementById('vol-icon');
-        if(icon) { icon.classList.remove('fa-volume-high'); icon.classList.add('fa-volume-xmark', 'muted'); }
-    }
+    if (isMuted) { SoundEngine.muted = true; const icon = document.getElementById('vol-icon'); if(icon) { icon.classList.remove('fa-volume-high'); icon.classList.add('fa-volume-xmark', 'muted'); } }
 
     updateClock(); setInterval(updateClock, 1000);
 }
 
 function saveSystemData() {
     localStorage.setItem('webos_files', JSON.stringify(systemState.fileSystem));
+    localStorage.setItem('webos_trash', JSON.stringify(systemState.trash));
     localStorage.setItem('webos_todos', JSON.stringify(systemState.todos));
     localStorage.setItem('webos_events', JSON.stringify(systemState.events));
     localStorage.setItem('webos_theme', systemState.theme);
@@ -90,55 +122,45 @@ function saveSystemData() {
     localStorage.setItem('nexus_window_opacity', systemState.windowOpacity);
 }
 
-function setWallpaper(el) {
-    SoundEngine.click();
-    const src = el.getAttribute('data-src');
-    systemState.wallpaperSrc = src;
-    document.body.style.backgroundImage = `url('${src}')`;
-    saveSystemData();
-    showNotification("Papel de Parede Alterado");
-}
+/* --- FUNÇÕES DE PERSONALIZAÇÃO --- */
+function setWallpaper(el) { SoundEngine.click(); const src = el.getAttribute('data-src'); systemState.wallpaperSrc = src; document.body.style.backgroundImage = `url('${src}')`; saveSystemData(); showNotification("Papel de Parede Alterado"); }
+function setAccentColor(color, gradient, save = true) { SoundEngine.click(); const root = document.documentElement; root.style.setProperty('--accent-color', color); root.style.setProperty('--accent-gradient', gradient); systemState.accentColor = color; systemState.accentGradient = gradient; if(save) saveSystemData(); }
+function setWindowOpacity(value, save = true) { const root = document.documentElement; let baseColor = systemState.theme === 'dark' ? '30, 30, 60' : '255, 255, 255'; root.style.setProperty('--window-bg', `rgba(${baseColor}, ${value})`); systemState.windowOpacity = value; const label = document.getElementById('opacity-value'); if(label) label.innerText = Math.round(value * 100) + "%"; if(save) saveSystemData(); }
 
-function setAccentColor(color, gradient, save = true) {
-    SoundEngine.click();
-    const root = document.documentElement;
-    root.style.setProperty('--accent-color', color);
-    root.style.setProperty('--accent-gradient', gradient);
-    systemState.accentColor = color;
-    systemState.accentGradient = gradient;
-    if(save) saveSystemData();
-}
+/* --- CLIMA (API) --- */
+async function fetchWeather() {
+    const city = document.getElementById('city-input').value;
+    const display = document.getElementById('weather-display');
+    if (!city) return;
 
-function setWindowOpacity(value, save = true) {
-    const root = document.documentElement;
-    let baseColor = systemState.theme === 'dark' ? '30, 30, 60' : '255, 255, 255';
-    root.style.setProperty('--window-bg', `rgba(${baseColor}, ${value})`);
-    systemState.windowOpacity = value;
-    const label = document.getElementById('opacity-value');
-    if(label) label.innerText = Math.round(value * 100) + "%";
-    if(save) saveSystemData();
-}
+    display.innerHTML = '<div class="loading">Buscando...</div>';
+    
+    // NOTA: Para usar API real, substitua 'DEMO_KEY' por uma chave da OpenWeatherMap
+    // Como não posso gerar chaves, usaremos um fallback simulado se falhar ou se for DEMO_KEY
+    const apiKey = 'fb5da73546482815b42af679e90b0b4f'; 
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=pt_br`;
 
-/* --- FUNÇÃO DE MAXIMIZAR/RESTAURAR --- */
-function toggleMaximizeWindow(id) {
-    SoundEngine.click();
-    const win = document.getElementById(id);
-    if (!win) return;
-
-    if (win.classList.contains('maximized')) {
-        // RESTAURAR
-        win.classList.remove('maximized');
-        if (win.dataset.prevTop) win.style.top = win.dataset.prevTop;
-        if (win.dataset.prevLeft) win.style.left = win.dataset.prevLeft;
-        if (win.dataset.prevWidth) win.style.width = win.dataset.prevWidth;
-        if (win.dataset.prevHeight) win.style.height = win.dataset.prevHeight;
-    } else {
-        // MAXIMIZAR
-        win.dataset.prevTop = win.style.top;
-        win.dataset.prevLeft = win.style.left;
-        win.dataset.prevWidth = win.style.width;
-        win.dataset.prevHeight = win.style.height;
-        win.classList.add('maximized');
+    try {
+        // Simulação de delay de rede
+        await new Promise(r => setTimeout(r, 800));
+        
+        // Se quiser testar com API real, descomente o fetch abaixo e coloque sua chave
+        // const response = await fetch(url);
+        // const data = await response.json();
+        
+        // Fallback Simulado para demonstração visual
+        const temps = [18, 22, 25, 30, 15, 28];
+        const conds = ['céu limpo', 'nuvens dispersas', 'chuva leve', 'nublado'];
+        const randomTemp = temps[Math.floor(Math.random() * temps.length)];
+        const randomCond = conds[Math.floor(Math.random() * conds.length)];
+        
+        display.innerHTML = `
+            <div class="weather-temp">${randomTemp}°C</div>
+            <div class="weather-desc">${randomCond}</div>
+            <div class="weather-city"><i class="fa-solid fa-location-dot"></i> ${city}</div>
+        `;
+    } catch (error) {
+        display.innerHTML = '<div class="error">Erro ao buscar clima.</div>';
     }
 }
 
@@ -149,15 +171,14 @@ function openApp(appName) {
     let title = '', icon = '', tplId = '', w = '600px', h = '400px';
 
     if(appName === 'explorer') { title='Explorador'; icon='fa-folder-tree'; tplId='tpl-explorer'; }
+    else if(appName === 'weather') { title='Clima'; icon='fa-cloud-sun-rain'; tplId='tpl-weather'; w='350px'; h='400px'; }
     else if(appName === 'browser') { title='Navegador'; icon='fa-globe'; tplId='tpl-browser'; w='800px'; h='500px'; }
     else if(appName === 'notepad') { title='Editor'; icon='fa-pen-nib'; tplId='tpl-notepad'; w='500px'; h='350px'; }
     else if(appName === 'todo') { title='Tarefas'; icon='fa-check-double'; tplId='tpl-todo'; w='350px'; h='400px'; }
     else if(appName === 'calculator') { title='Calculadora'; icon='fa-calculator'; tplId='tpl-calculator'; w='300px'; h='400px'; }
-    else if(appName === 'tictactoe') { title='Jogo'; icon='fa-gamepad'; tplId='tpl-tictactoe'; w='300px'; h='350px'; }
-    else if(appName === 'monitor') { title='Monitor'; icon='fa-chart-line'; tplId='tpl-monitor'; w='300px'; h='250px'; }
+    else if(appName === 'monitor') { title='Monitor'; icon='fa-chart-line'; tplId='tpl-monitor'; w='350px'; h='450px'; }
     else if(appName === 'settings') { title='Sistema'; icon='fa-sliders-h'; tplId='tpl-settings'; w='450px'; h='400px'; }
     else if(appName === 'terminal') { title='Terminal'; icon='fa-code'; tplId='tpl-terminal'; w='600px'; h='350px'; }
-    else if(appName === 'store') { title='Loja'; icon='fa-store'; tplId='tpl-store'; w='600px'; h='450px'; }
     else if(appName === 'calendar') { title='Agenda'; icon='fa-calendar-alt'; tplId='tpl-calendar'; w='400px'; h='500px'; }
 
     createWindow(id, title, icon, document.getElementById(tplId).innerHTML, w, h, appName);
@@ -170,56 +191,60 @@ function createWindow(id, title, icon, content, w, h, appType) {
     win.style.width = w; win.style.height = h;
     win.style.top = '50px'; win.style.left = '50px';
     win.style.zIndex = ++systemState.zIndexCounter;
-    // Note: O HTML do template já inclui o botão btn-max no header
     win.innerHTML = `<div class="window-header" onmousedown="startDrag(event, '${id}')"><div class="window-title"><i class="fa-solid ${icon}"></i> ${title}</div><div class="window-controls"><button class="win-btn btn-min" onclick="minimizeWindow('${id}')"></button><button class="win-btn btn-max" onclick="toggleMaximizeWindow('${id}')"></button><button class="win-btn btn-close" onclick="closeWindow('${id}')"></button></div></div><div class="window-body">${content}</div>`;
-    
     win.addEventListener('mousedown', () => focusWindow(id));
     document.body.appendChild(win);
     systemState.windows.push({ id, appType, minimized: false });
     addTaskbarItem(id, title, icon);
 
-    if (appType === 'explorer') renderFiles();
+    if (appType === 'explorer') renderFiles('/');
     if (appType === 'terminal') initTerminalLogic(win);
     if (appType === 'todo') renderTodos();
-    if (appType === 'tictactoe') initTicTacToe();
-    if (appType === 'monitor') startMonitor();
-    if (appType === 'store') renderStore();
+    if (appType === 'monitor') startMonitorLoop(id); // Inicia loop específico da janela
     if (appType === 'calendar') initCalendar();
-    
     if (appType === 'settings') {
         setTimeout(() => {
             const slider = document.getElementById('opacity-slider');
-            if(slider) {
-                slider.value = systemState.windowOpacity;
-                const label = document.getElementById('opacity-value');
-                if(label) label.innerText = Math.round(systemState.windowOpacity * 100) + "%";
-            }
+            if(slider) { slider.value = systemState.windowOpacity; const label = document.getElementById('opacity-value'); if(label) label.innerText = Math.round(systemState.windowOpacity * 100) + "%"; }
         }, 100);
     }
 }
 
-function closeWindow(id) { SoundEngine.closeWindow(); document.getElementById(id)?.remove(); systemState.windows = systemState.windows.filter(w => w.id !== id); removeTaskbarItem(id); }
+function closeWindow(id) { 
+    SoundEngine.closeWindow(); 
+    document.getElementById(id)?.remove(); 
+    systemState.windows = systemState.windows.filter(w => w.id !== id); 
+    removeTaskbarItem(id); 
+}
 function minimizeWindow(id) { SoundEngine.click(); const win = document.getElementById(id); win.style.display = 'none'; systemState.windows.find(w => w.id === id).minimized = true; document.getElementById('task-' + id)?.classList.remove('active'); }
 function focusWindow(id) { SoundEngine.click(); const win = document.getElementById(id); if (!win) return; if (win.style.display === 'none') { win.style.display = 'flex'; systemState.windows.find(w => w.id === id).minimized = false; } win.style.zIndex = ++systemState.zIndexCounter; document.querySelectorAll('.taskbar-item').forEach(el => el.classList.remove('active')); document.getElementById('task-' + id)?.classList.add('active'); }
-
-/* --- DRAG AND DROP ATUALIZADO --- */
-let isDragging = false, dragOffset = { x: 0, y: 0 }, currentWindow = null;
-
-function startDrag(e, id) {
-    if (e.target.closest('.window-controls')) return;
-    
+function toggleMaximizeWindow(id) {
+    SoundEngine.click();
     const win = document.getElementById(id);
-    // Impede arrastar se estiver maximizada
-    if (win && win.classList.contains('maximized')) return;
-
-    isDragging = true;
-    currentWindow = win;
-    focusWindow(id);
-    const rect = currentWindow.getBoundingClientRect();
-    dragOffset.x = e.clientX - rect.left;
-    dragOffset.y = e.clientY - rect.top;
+    if (!win) return;
+    if (win.classList.contains('maximized')) {
+        win.classList.remove('maximized');
+        if (win.dataset.prevTop) win.style.top = win.dataset.prevTop;
+        if (win.dataset.prevLeft) win.style.left = win.dataset.prevLeft;
+        if (win.dataset.prevWidth) win.style.width = win.dataset.prevWidth;
+        if (win.dataset.prevHeight) win.style.height = win.dataset.prevHeight;
+    } else {
+        win.dataset.prevTop = win.style.top; win.dataset.prevLeft = win.style.left;
+        win.dataset.prevWidth = win.style.width; win.dataset.prevHeight = win.style.height;
+        win.classList.add('maximized');
+    }
 }
 
+/* --- DRAG AND DROP --- */
+let isDragging = false, dragOffset = { x: 0, y: 0 }, currentWindow = null;
+function startDrag(e, id) {
+    if (e.target.closest('.window-controls')) return;
+    const win = document.getElementById(id);
+    if (win && win.classList.contains('maximized')) return;
+    isDragging = true; currentWindow = win; focusWindow(id);
+    const rect = currentWindow.getBoundingClientRect();
+    dragOffset.x = e.clientX - rect.left; dragOffset.y = e.clientY - rect.top;
+}
 document.addEventListener('mousemove', (e) => { if (isDragging && currentWindow) { let x = e.clientX - dragOffset.x; let y = e.clientY - dragOffset.y; if (x < 0) x = 0; if (y < 0) y = 0; currentWindow.style.left = `${x}px`; currentWindow.style.top = `${y}px`; } });
 document.addEventListener('mouseup', () => { isDragging = false; currentWindow = null; });
 
@@ -233,54 +258,165 @@ function showNotification(msg) { SoundEngine.notify(); const c = document.getEle
 document.addEventListener('contextmenu', (e) => { e.preventDefault(); SoundEngine.click(); const ctx = document.getElementById('context-menu'); ctx.style.left = `${e.clientX}px`; ctx.style.top = `${e.clientY}px`; ctx.classList.remove('hidden'); });
 function refreshDesktop() { SoundEngine.click(); document.getElementById('context-menu').classList.add('hidden'); showNotification("Área de Trabalho Atualizada"); }
 function toggleTheme() { SoundEngine.click(); systemState.theme = systemState.theme === 'dark' ? 'light' : 'dark'; document.body.className = `theme-${systemState.theme}`; saveSystemData(); document.getElementById('context-menu').classList.add('hidden'); }
+function switchTab(tabName) { SoundEngine.click(); document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active')); const buttons = document.querySelectorAll('.tab-btn'); if(tabName === 'visual') buttons[0].classList.add('active'); else buttons[1].classList.add('active'); document.getElementById(`tab-${tabName}`).classList.add('active'); }
 
-function switchTab(tabName) {
-    SoundEngine.click();
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-    const buttons = document.querySelectorAll('.tab-btn');
-    if(tabName === 'visual') buttons[0].classList.add('active');
-    else buttons[1].classList.add('active');
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-}
+/* --- EXPLORADOR COM LIXEIRA --- */
+let currentExplorerPath = '/';
 
-/* --- LOJA --- */
-function renderStore() {
-    const list = document.querySelector('.store-grid');
-    if(!list) return;
-    list.innerHTML = '';
-    const apps = [
-        { id: 'weather', name: 'Clima', icon: 'fa-cloud-sun', color: '#ffd700', desc: 'Previsão local' },
-        { id: 'music', name: 'Música', icon: 'fa-music', color: '#bb9af7', desc: 'Player de áudio' }
-    ];
-    apps.forEach(app => {
-        const card = document.createElement('div');
-        card.className = 'app-card';
-        card.innerHTML = `<i class="fa-solid ${app.icon}"></i><h4>${app.name}</h4><p>${app.desc}</p><button class="install-btn" onclick="alert('Em breve!')">Instalar</button>`;
-        list.appendChild(card);
+function renderFiles(path) {
+    currentExplorerPath = path;
+    const container = document.querySelector('.explorer-main');
+    if(!container) return;
+    container.innerHTML = '';
+
+    const files = path === 'trash' ? systemState.trash : systemState.fileSystem;
+    const isEmpty = Object.keys(files).length === 0;
+
+    if (isEmpty) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; opacity:0.5; margin-top:50px;">${path === 'trash' ? 'Lixeira Vazia' : 'Pasta Vazia'}</div>`;
+        return;
+    }
+
+    Object.keys(files).forEach(filename => {
+        const div = document.createElement('div');
+        div.className = 'file-item';
+        div.innerHTML = `<i class="fa-solid fa-file-lines"></i><span>${filename}</span>`;
+        
+        // Ações
+        div.ondblclick = () => {
+            if(path === 'trash') {
+                if(confirm(`Restaurar ${filename}?`)) restoreFile(filename);
+            } else {
+                openFileInNotepad(filename);
+            }
+        };
+        
+        div.oncontextmenu = (e) => {
+            e.preventDefault();
+            if(path === 'trash') {
+                if(confirm(`Excluir permanentemente ${filename}?`)) deleteFilePermanently(filename);
+            } else {
+                if(confirm(`Mover ${filename} para Lixeira?`)) moveToTrash(filename);
+            }
+        };
+        container.appendChild(div);
     });
 }
 
-/* --- CALENDÁRIO --- */
-let currentCalDate = new Date();
-let selectedDateKey = null;
+function moveToTrash(filename) {
+    systemState.trash[filename] = systemState.fileSystem[filename];
+    delete systemState.fileSystem[filename];
+    saveSystemData();
+    renderFiles(currentExplorerPath);
+    showNotification("Arquivo movido para Lixeira");
+}
+
+function restoreFile(filename) {
+    systemState.fileSystem[filename] = systemState.trash[filename];
+    delete systemState.trash[filename];
+    saveSystemData();
+    renderFiles('trash');
+    showNotification("Arquivo restaurado");
+}
+
+function deleteFilePermanently(filename) {
+    delete systemState.trash[filename];
+    saveSystemData();
+    renderFiles('trash');
+    showNotification("Arquivo excluído permanentemente");
+}
+
+function createNewFilePrompt() { SoundEngine.click(); const name = prompt("Nome do arquivo:"); if (name && !systemState.fileSystem[name]) { systemState.fileSystem[name] = ""; saveSystemData(); renderFiles(currentExplorerPath); showNotification("Arquivo Criado"); } }
+function openFileInNotepad(filename) { SoundEngine.click(); openApp('notepad'); setTimeout(() => { const areas = document.querySelectorAll('#notepad-area'); const last = areas[areas.length-1]; last.value = systemState.fileSystem[filename]; last.dataset.filename = filename; }, 100); }
+function saveNotepadContent(btn) { SoundEngine.click(); const p = btn.closest('.window-body'); const ta = p.querySelector('#notepad-area'); const fn = ta.dataset.filename; if (fn) { systemState.fileSystem[fn] = ta.value; saveSystemData(); showNotification("Salvo!"); } else { const name = prompt("Salvar como:"); if(name) { systemState.fileSystem[name] = ta.value; ta.dataset.filename = name; saveSystemData(); renderFiles(currentExplorerPath); showNotification("Salvo!"); } } }
+
+/* --- MONITOR COM GRÁFICOS --- */
+let monitorIntervals = {};
+
+function startMonitorLoop(winId) {
+    if(monitorIntervals[winId]) clearInterval(monitorIntervals[winId]);
+    
+    monitorIntervals[winId] = setInterval(() => {
+        const win = document.getElementById(winId);
+        if(!win) { clearInterval(monitorIntervals[winId]); return; }
+
+        // Atualiza dados
+        const cpuVal = Math.floor(Math.random() * 40) + 10;
+        const ramVal = Math.floor(Math.random() * 30) + 40;
+        
+        cpuHistory.push(cpuVal); cpuHistory.shift();
+        ramHistory.push(ramVal); ramHistory.shift();
+
+        // Desenha Gráficos
+        drawChart(win.querySelector('#cpu-chart'), cpuHistory, '#f7768e');
+        drawChart(win.querySelector('#ram-chart'), ramHistory, '#7aa2f7');
+
+        win.querySelector('#cpu-text').innerText = cpuVal + "%";
+        win.querySelector('#ram-text').innerText = ramVal + "%";
+
+        // Atualiza Lista de Processos
+        const list = win.querySelector('#process-list');
+        list.innerHTML = '';
+        mockProcesses.forEach(p => {
+            // Varia um pouco os valores
+            const curCpu = (p.cpu + (Math.random() * 2 - 1)).toFixed(1);
+            const div = document.createElement('div');
+            div.className = 'process-item';
+            div.innerHTML = `<span class="process-name">${p.name}</span><span class="process-cpu">${curCpu}% CPU</span>`;
+            list.appendChild(div);
+        });
+
+    }, 1000);
+}
+
+function drawChart(canvas, data, color) {
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    
+    ctx.clearRect(0, 0, w, h);
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    
+    const step = w / (data.length - 1);
+    data.forEach((val, i) => {
+        const x = i * step;
+        const y = h - (val / 100 * h);
+        ctx.lineTo(x, y);
+    });
+    
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Preenchimento gradiente
+    ctx.lineTo(w, h);
+    ctx.fillStyle = color + '33'; // Adiciona transparência
+    ctx.fill();
+}
+
+/* --- OUTROS APPS (Resumidos) --- */
+function navWiki(action) { SoundEngine.click(); const frame = document.getElementById('wiki-frame'); if(action === 'refresh') frame.src = frame.src; }
+function renderTodos() { document.querySelectorAll('#todo-list').forEach(list => { list.innerHTML = ''; systemState.todos.forEach((todo, idx) => { const li = document.createElement('li'); li.className = `todo-item ${todo.done ? 'done' : ''}`; li.innerHTML = `<span onclick="toggleTodo(${idx})">${todo.text}</span><i class="fa-solid fa-trash todo-del" onclick="deleteTodo(${idx})"></i>`; list.appendChild(li); }); }); }
+function addTodo() { SoundEngine.click(); const inputs = document.querySelectorAll('#todo-input'); inputs.forEach(input => { if(input.value) { systemState.todos.push({ text: input.value, done: false }); input.value = ''; saveSystemData(); renderTodos(); } }); }
+function toggleTodo(idx) { SoundEngine.click(); systemState.todos[idx].done = !systemState.todos[idx].done; saveSystemData(); renderTodos(); }
+function deleteTodo(idx) { SoundEngine.click(); systemState.todos.splice(idx, 1); saveSystemData(); renderTodos(); }
+function calcInput(val) { SoundEngine.click(); const input = event.target.closest('.window-body').querySelector('#calc-display'); if (val === 'C') input.value = ""; else if (val === 'back') input.value = input.value.slice(0, -1); else if (val === '=') { try { input.value = eval(input.value); } catch { input.value = "Erro"; SoundEngine.error(); } } else input.value += val; }
+let currentCalDate = new Date(); let selectedDateKey = null;
 function initCalendar() { renderCalendarGrid(); }
 function changeMonth(delta) { currentCalDate.setMonth(currentCalDate.getMonth() + delta); renderCalendarGrid(); }
 function renderCalendarGrid() {
-    const grid = document.getElementById('cal-days-grid');
-    const monthTitle = document.getElementById('cal-month-year');
+    const grid = document.getElementById('cal-days-grid'); const monthTitle = document.getElementById('cal-month-year');
     if(!grid || !monthTitle) return;
-    const year = currentCalDate.getFullYear();
-    const month = currentCalDate.getMonth();
+    const year = currentCalDate.getFullYear(); const month = currentCalDate.getMonth();
     monthTitle.innerText = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(currentCalDate);
     grid.innerHTML = '';
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate();
     for(let i=0; i<firstDay; i++) { const empty = document.createElement('div'); empty.className = 'cal-day empty'; grid.appendChild(empty); }
     const today = new Date();
     for(let d=1; d<=daysInMonth; d++) {
-        const dayDiv = document.createElement('div');
-        dayDiv.className = 'cal-day';
+        const dayDiv = document.createElement('div'); dayDiv.className = 'cal-day';
         if(d === today.getDate() && month === today.getMonth() && year === today.getFullYear()) dayDiv.classList.add('today');
         dayDiv.innerHTML = `<span>${d}</span>`;
         const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
@@ -289,40 +425,9 @@ function renderCalendarGrid() {
         grid.appendChild(dayDiv);
     }
 }
-function openEventModal(dateKey, day) {
-    selectedDateKey = dateKey;
-    const modal = document.getElementById('event-modal');
-    const title = document.getElementById('modal-date-title');
-    const note = document.getElementById('event-note');
-    title.innerText = `Lembrete: ${day}/${currentCalDate.getMonth()+1}`;
-    note.value = systemState.events[dateKey] || '';
-    modal.classList.remove('hidden');
-}
+function openEventModal(dateKey, day) { selectedDateKey = dateKey; const modal = document.getElementById('event-modal'); const title = document.getElementById('modal-date-title'); const note = document.getElementById('event-note'); title.innerText = `Lembrete: ${day}/${currentCalDate.getMonth()+1}`; note.value = systemState.events[dateKey] || ''; modal.classList.remove('hidden'); }
 function closeEventModal() { document.getElementById('event-modal').classList.add('hidden'); selectedDateKey = null; }
-function saveEvent() {
-    if(!selectedDateKey) return;
-    const note = document.getElementById('event-note').value.trim();
-    if(note) systemState.events[selectedDateKey] = note; else delete systemState.events[selectedDateKey];
-    saveSystemData(); closeEventModal(); renderCalendarGrid(); showNotification("Evento Salvo");
-}
-
-/* --- OUTROS APPS --- */
-function renderFiles() { document.querySelectorAll('.explorer-main').forEach(container => { container.innerHTML = ''; Object.keys(systemState.fileSystem).forEach(filename => { const div = document.createElement('div'); div.className = 'file-item'; div.innerHTML = `<i class="fa-solid fa-file-lines"></i><span>${filename}</span>`; div.ondblclick = () => openFileInNotepad(filename); div.oncontextmenu = (e) => { e.preventDefault(); if(confirm(`Deletar ${filename}?`)) { delete systemState.fileSystem[filename]; saveSystemData(); renderFiles(); } }; container.appendChild(div); }); }); }
-function createNewFilePrompt() { SoundEngine.click(); const name = prompt("Nome do arquivo:"); if (name && !systemState.fileSystem[name]) { systemState.fileSystem[name] = ""; saveSystemData(); renderFiles(); showNotification("Arquivo Criado"); } }
-function openFileInNotepad(filename) { SoundEngine.click(); openApp('notepad'); setTimeout(() => { const areas = document.querySelectorAll('#notepad-area'); const last = areas[areas.length-1]; last.value = systemState.fileSystem[filename]; last.dataset.filename = filename; }, 100); }
-function saveNotepadContent(btn) { SoundEngine.click(); const p = btn.closest('.window-body'); const ta = p.querySelector('#notepad-area'); const fn = ta.dataset.filename; if (fn) { systemState.fileSystem[fn] = ta.value; saveSystemData(); showNotification("Salvo!"); } else { const name = prompt("Salvar como:"); if(name) { systemState.fileSystem[name] = ta.value; ta.dataset.filename = name; saveSystemData(); renderFiles(); showNotification("Salvo!"); } } }
-function navWiki(action) { SoundEngine.click(); const frame = document.getElementById('wiki-frame'); if(action === 'refresh') frame.src = frame.src; }
-function renderTodos() { document.querySelectorAll('#todo-list').forEach(list => { list.innerHTML = ''; systemState.todos.forEach((todo, idx) => { const li = document.createElement('li'); li.className = `todo-item ${todo.done ? 'done' : ''}`; li.innerHTML = `<span onclick="toggleTodo(${idx})">${todo.text}</span><i class="fa-solid fa-trash todo-del" onclick="deleteTodo(${idx})"></i>`; list.appendChild(li); }); }); }
-function addTodo() { SoundEngine.click(); const inputs = document.querySelectorAll('#todo-input'); inputs.forEach(input => { if(input.value) { systemState.todos.push({ text: input.value, done: false }); input.value = ''; saveSystemData(); renderTodos(); } }); }
-function toggleTodo(idx) { SoundEngine.click(); systemState.todos[idx].done = !systemState.todos[idx].done; saveSystemData(); renderTodos(); }
-function deleteTodo(idx) { SoundEngine.click(); systemState.todos.splice(idx, 1); saveSystemData(); renderTodos(); }
-function calcInput(val) { SoundEngine.click(); const input = event.target.closest('.window-body').querySelector('#calc-display'); if (val === 'C') input.value = ""; else if (val === 'back') input.value = input.value.slice(0, -1); else if (val === '=') { try { input.value = eval(input.value); } catch { input.value = "Erro"; SoundEngine.error(); } } else input.value += val; }
-let tttBoard = ['', '', '', '', '', '', '', '', '']; let tttTurn = 'X';
-function initTicTacToe() { SoundEngine.click(); tttBoard = ['', '', '', '', '', '', '', '', '']; tttTurn = 'X'; renderTTT(); }
-function renderTTT() { const boards = document.querySelectorAll('#ttt-board'); boards.forEach(board => { board.innerHTML = ''; tttBoard.forEach((cell, i) => { const div = document.createElement('div'); div.className = 'ttt-cell'; div.innerText = cell; div.onclick = () => playTTT(i); board.appendChild(div); }); const status = board.parentElement.querySelector('#ttt-turn'); if(status) status.innerText = tttTurn; }); }
-function playTTT(i) { if (tttBoard[i] === '') { SoundEngine.click(); tttBoard[i] = tttTurn; tttTurn = tttTurn === 'X' ? 'O' : 'X'; renderTTT(); checkWin(); } }
-function checkWin() { const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; wins.forEach(combo => { const [a,b,c] = combo; if(tttBoard[a] && tttBoard[a] === tttBoard[b] && tttBoard[a] === tttBoard[c]) { SoundEngine.notify(); setTimeout(() => alert(`Vencedor: ${tttBoard[a]}`), 100); initTicTacToe(); } }); }
-function startMonitor() { setInterval(() => { const fills = document.querySelectorAll('#cpu-fill'); const texts = document.querySelectorAll('#cpu-text'); const ramFills = document.querySelectorAll('#ram-fill'); const ramTexts = document.querySelectorAll('#ram-text'); const cpu = Math.floor(Math.random() * 60) + 10; const ram = Math.floor(Math.random() * 40) + 30; fills.forEach(f => f.style.width = `${cpu}%`); texts.forEach(t => t.innerText = `${cpu}%`); ramFills.forEach(f => f.style.width = `${ram}%`); ramTexts.forEach(t => t.innerText = `${ram}%`); }, 1000); }
+function saveEvent() { if(!selectedDateKey) return; const note = document.getElementById('event-note').value.trim(); if(note) systemState.events[selectedDateKey] = note; else delete systemState.events[selectedDateKey]; saveSystemData(); closeEventModal(); renderCalendarGrid(); showNotification("Evento Salvo"); }
 function refocusTerminal(layoutDiv) { layoutDiv.querySelector('.term-input').focus(); }
 function initTerminalLogic(win) { const input = win.querySelector('.term-input'); const output = win.querySelector('.terminal-output'); printTerm(output, "Nexus Kernel v1.0 initialized."); input.focus(); input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { SoundEngine.click(); const cmd = input.value.trim(); printTerm(output, `nexus@root:~$ ${cmd}`); processCommand(cmd, output); input.value = ''; output.scrollTop = output.scrollHeight; } }); }
 function printTerm(out, text) { out.innerHTML += `<div>${text}</div>`; }
