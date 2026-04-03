@@ -23,13 +23,12 @@ function toggleMute() {
 /* --- ESTADO DO SISTEMA --- */
 const systemState = { 
     windows: [], zIndexCounter: 100, 
-    fileSystem: {}, trash: {}, // Lixeira adicionada
+    fileSystem: {}, trash: {}, 
     todos: [], theme: 'dark', wallpaperSrc: '', 
     accentColor: '#7aa2f7', accentGradient: 'linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)', 
     windowOpacity: 0.85, events: {} 
 };
 
-// Dados para Task Manager Simulado
 const mockProcesses = [
     { name: 'nexus_kernel', cpu: 2.5, mem: 120 },
     { name: 'window_manager', cpu: 1.2, mem: 85 },
@@ -40,7 +39,6 @@ const mockProcesses = [
     { name: 'sys_monitor', cpu: 1.0, mem: 25 }
 ];
 
-// Histórico para gráficos
 let cpuHistory = new Array(50).fill(0);
 let ramHistory = new Array(50).fill(0);
 
@@ -48,12 +46,7 @@ document.addEventListener('DOMContentLoaded', () => { loadSystemData(); startBoo
 
 function setupShortcuts() {
     document.addEventListener('keydown', (e) => {
-        // Win + D (Mostrar Desktop)
-        if (e.key === 'd' && e.metaKey) {
-            e.preventDefault();
-            systemState.windows.forEach(w => minimizeWindow(w.id));
-        }
-        // Alt + Tab (Focar próxima janela) - Simplificado
+        if (e.key === 'd' && e.metaKey) { e.preventDefault(); systemState.windows.forEach(w => minimizeWindow(w.id)); }
         if (e.key === 'Tab' && e.altKey) {
             e.preventDefault();
             if(systemState.windows.length > 0) {
@@ -91,18 +84,29 @@ function loadSystemData() {
     const storedEvents = localStorage.getItem('webos_events');
     if (storedEvents) systemState.events = JSON.parse(storedEvents);
 
+    // Carregar Tema
     const storedTheme = localStorage.getItem('webos_theme');
     if (storedTheme) { systemState.theme = storedTheme; document.body.className = `theme-${storedTheme}`; }
     
+    // Carregar Wallpaper
     const storedWpSrc = localStorage.getItem('nexus_wp_src');
     if (storedWpSrc) { document.body.style.backgroundImage = `url('${storedWpSrc}')`; systemState.wallpaperSrc = storedWpSrc; }
 
+    // Carregar Personalização Visual (Cores e Transparência)
     const storedAccent = localStorage.getItem('nexus_accent_color');
     const storedGradient = localStorage.getItem('nexus_accent_gradient');
     const storedOpacity = localStorage.getItem('nexus_window_opacity');
 
     if (storedAccent && storedGradient) setAccentColor(storedAccent, storedGradient, false);
-    if (storedOpacity) { setWindowOpacity(storedOpacity, false); const slider = document.getElementById('opacity-slider'); if(slider) slider.value = storedOpacity; }
+    
+    if (storedOpacity) { 
+        setWindowOpacity(storedOpacity, false); 
+        // Atualiza o slider visualmente se ele existir na página
+        const slider = document.getElementById('opacity-slider');
+        if(slider) slider.value = storedOpacity;
+        const label = document.getElementById('opacity-value');
+        if(label) label.innerText = Math.round(storedOpacity * 100) + "%";
+    }
 
     const isMuted = localStorage.getItem('nexus_muted') === 'true';
     if (isMuted) { SoundEngine.muted = true; const icon = document.getElementById('vol-icon'); if(icon) { icon.classList.remove('fa-volume-high'); icon.classList.add('fa-volume-xmark', 'muted'); } }
@@ -133,30 +137,26 @@ async function fetchWeather() {
     const display = document.getElementById('weather-display');
     if (!city) return;
 
-    display.innerHTML = '<div class="loading">Buscando...</div>';
+    display.innerHTML = '<div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Buscando...</div>';
     
-    // NOTA: Para usar API real, substitua 'DEMO_KEY' por uma chave da OpenWeatherMap
-    // Como não posso gerar chaves, usaremos um fallback simulado se falhar ou se for DEMO_KEY
-    const apiKey = 'fb5da73546482815b42af679e90b0b4f'; 
+    // SUBSTITUA PELA SUA CHAVE DA OPENWEATHERMAP OU USE DEMO_KEY PARA TESTE LIMITADO
+    const apiKey = 'DEMO_KEY'; 
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=pt_br`;
 
     try {
-        // Simulação de delay de rede
-        await new Promise(r => setTimeout(r, 800));
+        await new Promise(r => setTimeout(r, 800)); // Simula delay
         
-        // Se quiser testar com API real, descomente o fetch abaixo e coloque sua chave
-        // const response = await fetch(url);
-        // const data = await response.json();
-        
-        // Fallback Simulado para demonstração visual
+        // Fallback Simulado para demonstração visual se não tiver chave válida
         const temps = [18, 22, 25, 30, 15, 28];
         const conds = ['céu limpo', 'nuvens dispersas', 'chuva leve', 'nublado'];
         const randomTemp = temps[Math.floor(Math.random() * temps.length)];
         const randomCond = conds[Math.floor(Math.random() * conds.length)];
         
         display.innerHTML = `
+            <img src="https://openweathermap.org/img/wn/02d@2x.png" alt="Ícone" style="width: 80px;">
             <div class="weather-temp">${randomTemp}°C</div>
             <div class="weather-desc">${randomCond}</div>
+            <div class="weather-details"><span><i class="fa-solid fa-droplet"></i> 60%</span><span><i class="fa-solid fa-wind"></i> 12 km/h</span></div>
             <div class="weather-city"><i class="fa-solid fa-location-dot"></i> ${city}</div>
         `;
     } catch (error) {
@@ -200,22 +200,23 @@ function createWindow(id, title, icon, content, w, h, appType) {
     if (appType === 'explorer') renderFiles('/');
     if (appType === 'terminal') initTerminalLogic(win);
     if (appType === 'todo') renderTodos();
-    if (appType === 'monitor') startMonitorLoop(id); // Inicia loop específico da janela
+    if (appType === 'monitor') startMonitorLoop(id);
     if (appType === 'calendar') initCalendar();
+    
+    // Se for configurações, atualiza os controles visuais com os valores salvos
     if (appType === 'settings') {
         setTimeout(() => {
             const slider = document.getElementById('opacity-slider');
-            if(slider) { slider.value = systemState.windowOpacity; const label = document.getElementById('opacity-value'); if(label) label.innerText = Math.round(systemState.windowOpacity * 100) + "%"; }
+            if(slider) {
+                slider.value = systemState.windowOpacity;
+                const label = document.getElementById('opacity-value');
+                if(label) label.innerText = Math.round(systemState.windowOpacity * 100) + "%";
+            }
         }, 100);
     }
 }
 
-function closeWindow(id) { 
-    SoundEngine.closeWindow(); 
-    document.getElementById(id)?.remove(); 
-    systemState.windows = systemState.windows.filter(w => w.id !== id); 
-    removeTaskbarItem(id); 
-}
+function closeWindow(id) { SoundEngine.closeWindow(); document.getElementById(id)?.remove(); systemState.windows = systemState.windows.filter(w => w.id !== id); removeTaskbarItem(id); }
 function minimizeWindow(id) { SoundEngine.click(); const win = document.getElementById(id); win.style.display = 'none'; systemState.windows.find(w => w.id === id).minimized = true; document.getElementById('task-' + id)?.classList.remove('active'); }
 function focusWindow(id) { SoundEngine.click(); const win = document.getElementById(id); if (!win) return; if (win.style.display === 'none') { win.style.display = 'flex'; systemState.windows.find(w => w.id === id).minimized = false; } win.style.zIndex = ++systemState.zIndexCounter; document.querySelectorAll('.taskbar-item').forEach(el => el.classList.remove('active')); document.getElementById('task-' + id)?.classList.add('active'); }
 function toggleMaximizeWindow(id) {
@@ -262,141 +263,69 @@ function switchTab(tabName) { SoundEngine.click(); document.querySelectorAll('.t
 
 /* --- EXPLORADOR COM LIXEIRA --- */
 let currentExplorerPath = '/';
-
 function renderFiles(path) {
     currentExplorerPath = path;
     const container = document.querySelector('.explorer-main');
     if(!container) return;
     container.innerHTML = '';
-
     const files = path === 'trash' ? systemState.trash : systemState.fileSystem;
     const isEmpty = Object.keys(files).length === 0;
-
-    if (isEmpty) {
-        container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; opacity:0.5; margin-top:50px;">${path === 'trash' ? 'Lixeira Vazia' : 'Pasta Vazia'}</div>`;
-        return;
-    }
-
+    if (isEmpty) { container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; opacity:0.5; margin-top:50px;">${path === 'trash' ? 'Lixeira Vazia' : 'Pasta Vazia'}</div>`; return; }
     Object.keys(files).forEach(filename => {
         const div = document.createElement('div');
         div.className = 'file-item';
         div.innerHTML = `<i class="fa-solid fa-file-lines"></i><span>${filename}</span>`;
-        
-        // Ações
-        div.ondblclick = () => {
-            if(path === 'trash') {
-                if(confirm(`Restaurar ${filename}?`)) restoreFile(filename);
-            } else {
-                openFileInNotepad(filename);
-            }
-        };
-        
-        div.oncontextmenu = (e) => {
-            e.preventDefault();
-            if(path === 'trash') {
-                if(confirm(`Excluir permanentemente ${filename}?`)) deleteFilePermanently(filename);
-            } else {
-                if(confirm(`Mover ${filename} para Lixeira?`)) moveToTrash(filename);
-            }
-        };
+        div.ondblclick = () => { if(path === 'trash') { if(confirm(`Restaurar ${filename}?`)) restoreFile(filename); } else { openFileInNotepad(filename); } };
+        div.oncontextmenu = (e) => { e.preventDefault(); if(path === 'trash') { if(confirm(`Excluir permanentemente ${filename}?`)) deleteFilePermanently(filename); } else { if(confirm(`Mover ${filename} para Lixeira?`)) moveToTrash(filename); } };
         container.appendChild(div);
     });
 }
-
-function moveToTrash(filename) {
-    systemState.trash[filename] = systemState.fileSystem[filename];
-    delete systemState.fileSystem[filename];
-    saveSystemData();
-    renderFiles(currentExplorerPath);
-    showNotification("Arquivo movido para Lixeira");
-}
-
-function restoreFile(filename) {
-    systemState.fileSystem[filename] = systemState.trash[filename];
-    delete systemState.trash[filename];
-    saveSystemData();
-    renderFiles('trash');
-    showNotification("Arquivo restaurado");
-}
-
-function deleteFilePermanently(filename) {
-    delete systemState.trash[filename];
-    saveSystemData();
-    renderFiles('trash');
-    showNotification("Arquivo excluído permanentemente");
-}
-
+function moveToTrash(filename) { systemState.trash[filename] = systemState.fileSystem[filename]; delete systemState.fileSystem[filename]; saveSystemData(); renderFiles(currentExplorerPath); showNotification("Arquivo movido para Lixeira"); }
+function restoreFile(filename) { systemState.fileSystem[filename] = systemState.trash[filename]; delete systemState.trash[filename]; saveSystemData(); renderFiles('trash'); showNotification("Arquivo restaurado"); }
+function deleteFilePermanently(filename) { delete systemState.trash[filename]; saveSystemData(); renderFiles('trash'); showNotification("Arquivo excluído permanentemente"); }
 function createNewFilePrompt() { SoundEngine.click(); const name = prompt("Nome do arquivo:"); if (name && !systemState.fileSystem[name]) { systemState.fileSystem[name] = ""; saveSystemData(); renderFiles(currentExplorerPath); showNotification("Arquivo Criado"); } }
 function openFileInNotepad(filename) { SoundEngine.click(); openApp('notepad'); setTimeout(() => { const areas = document.querySelectorAll('#notepad-area'); const last = areas[areas.length-1]; last.value = systemState.fileSystem[filename]; last.dataset.filename = filename; }, 100); }
 function saveNotepadContent(btn) { SoundEngine.click(); const p = btn.closest('.window-body'); const ta = p.querySelector('#notepad-area'); const fn = ta.dataset.filename; if (fn) { systemState.fileSystem[fn] = ta.value; saveSystemData(); showNotification("Salvo!"); } else { const name = prompt("Salvar como:"); if(name) { systemState.fileSystem[name] = ta.value; ta.dataset.filename = name; saveSystemData(); renderFiles(currentExplorerPath); showNotification("Salvo!"); } } }
 
 /* --- MONITOR COM GRÁFICOS --- */
 let monitorIntervals = {};
-
 function startMonitorLoop(winId) {
     if(monitorIntervals[winId]) clearInterval(monitorIntervals[winId]);
-    
     monitorIntervals[winId] = setInterval(() => {
         const win = document.getElementById(winId);
         if(!win) { clearInterval(monitorIntervals[winId]); return; }
-
-        // Atualiza dados
         const cpuVal = Math.floor(Math.random() * 40) + 10;
         const ramVal = Math.floor(Math.random() * 30) + 40;
-        
         cpuHistory.push(cpuVal); cpuHistory.shift();
         ramHistory.push(ramVal); ramHistory.shift();
-
-        // Desenha Gráficos
         drawChart(win.querySelector('#cpu-chart'), cpuHistory, '#f7768e');
         drawChart(win.querySelector('#ram-chart'), ramHistory, '#7aa2f7');
-
         win.querySelector('#cpu-text').innerText = cpuVal + "%";
         win.querySelector('#ram-text').innerText = ramVal + "%";
-
-        // Atualiza Lista de Processos
         const list = win.querySelector('#process-list');
         list.innerHTML = '';
         mockProcesses.forEach(p => {
-            // Varia um pouco os valores
             const curCpu = (p.cpu + (Math.random() * 2 - 1)).toFixed(1);
             const div = document.createElement('div');
             div.className = 'process-item';
             div.innerHTML = `<span class="process-name">${p.name}</span><span class="process-cpu">${curCpu}% CPU</span>`;
             list.appendChild(div);
         });
-
     }, 1000);
 }
-
 function drawChart(canvas, data, color) {
     if(!canvas) return;
     const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
-    
+    const w = canvas.width; const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
-    ctx.beginPath();
-    ctx.moveTo(0, h);
-    
+    ctx.beginPath(); ctx.moveTo(0, h);
     const step = w / (data.length - 1);
-    data.forEach((val, i) => {
-        const x = i * step;
-        const y = h - (val / 100 * h);
-        ctx.lineTo(x, y);
-    });
-    
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    
-    // Preenchimento gradiente
-    ctx.lineTo(w, h);
-    ctx.fillStyle = color + '33'; // Adiciona transparência
-    ctx.fill();
+    data.forEach((val, i) => { const x = i * step; const y = h - (val / 100 * h); ctx.lineTo(x, y); });
+    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+    ctx.lineTo(w, h); ctx.fillStyle = color + '33'; ctx.fill();
 }
 
-/* --- OUTROS APPS (Resumidos) --- */
+/* --- OUTROS APPS --- */
 function navWiki(action) { SoundEngine.click(); const frame = document.getElementById('wiki-frame'); if(action === 'refresh') frame.src = frame.src; }
 function renderTodos() { document.querySelectorAll('#todo-list').forEach(list => { list.innerHTML = ''; systemState.todos.forEach((todo, idx) => { const li = document.createElement('li'); li.className = `todo-item ${todo.done ? 'done' : ''}`; li.innerHTML = `<span onclick="toggleTodo(${idx})">${todo.text}</span><i class="fa-solid fa-trash todo-del" onclick="deleteTodo(${idx})"></i>`; list.appendChild(li); }); }); }
 function addTodo() { SoundEngine.click(); const inputs = document.querySelectorAll('#todo-input'); inputs.forEach(input => { if(input.value) { systemState.todos.push({ text: input.value, done: false }); input.value = ''; saveSystemData(); renderTodos(); } }); }
