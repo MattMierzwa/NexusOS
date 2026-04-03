@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusOS - Ultimate Update</title>
+    <title>NexusOS</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -120,19 +120,74 @@
         </div>
     </template>
 
+    <!-- TEMPLATE SETTINGS COMPLETO RESTAURADO -->
     <template id="tpl-settings">
         <div class="window-content settings-layout">
             <div class="settings-tabs">
                 <button class="tab-btn active" onclick="switchTab('visual')"><i class="fa-solid fa-paintbrush"></i> Visual</button>
                 <button class="tab-btn" onclick="switchTab('system')"><i class="fa-solid fa-microchip"></i> Sistema</button>
             </div>
+            
             <div id="tab-visual" class="tab-content active">
-                <div class="setting-group"><label>Tema Base:</label><button onclick="toggleTheme()" class="full-width-btn"><i class="fa-solid fa-adjust"></i> Alternar Claro / Escuro</button></div>
-                <div class="setting-group"><label>Cor de Destaque:</label><div class="color-picker-grid"><div class="color-option" style="background: #7aa2f7;" onclick="setAccentColor('#7aa2f7', '#2575fc')"></div><div class="color-option" style="background: #bb9af7;" onclick="setAccentColor('#bb9af7', '#8e2de2')"></div><div class="color-option" style="background: #9ece6a;" onclick="setAccentColor('#9ece6a', '#00b09b')"></div><div class="color-option" style="background: #f7768e;" onclick="setAccentColor('#f7768e', '#ff416c')"></div></div></div>
-                <div class="setting-group"><label>Papel de Parede:</label><div class="wallpaper-grid"><div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=300')" data-src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div><div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300')" data-src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div></div></div>
+                <div class="setting-group">
+                    <label>Tema Base:</label>
+                    <button onclick="toggleTheme()" class="full-width-btn"><i class="fa-solid fa-adjust"></i> Alternar Claro / Escuro</button>
+                </div>
+
+                <div class="setting-group">
+                    <label>Cor de Destaque (Accent):</label>
+                    <div class="color-picker-grid">
+                        <div class="color-option" style="background: #7aa2f7;" onclick="setAccentColor('#7aa2f7', 'linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)')"></div>
+                        <div class="color-option" style="background: #bb9af7;" onclick="setAccentColor('#bb9af7', 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)')"></div>
+                        <div class="color-option" style="background: #9ece6a;" onclick="setAccentColor('#9ece6a', 'linear-gradient(135deg, #00b09b 0%, #96c93d 100%)')"></div>
+                        <div class="color-option" style="background: #f7768e;" onclick="setAccentColor('#f7768e', 'linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%)')"></div>
+                        <div class="color-option" style="background: #e0af68;" onclick="setAccentColor('#e0af68', 'linear-gradient(135deg, #f2994a 0%, #f2c94c 100%)')"></div>
+                        <div class="color-option" style="background: #00d2ff;" onclick="setAccentColor('#00d2ff', 'linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)')"></div>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <label>Transparência das Janelas:</label>
+                    <input type="range" min="0.5" max="1" step="0.05" value="0.85" id="opacity-slider" oninput="setWindowOpacity(this.value)" style="width:100%">
+                    <small id="opacity-value" style="opacity:0.7; font-size:11px;">85%</small>
+                </div>
+
+                <div class="setting-group">
+                    <label>Papel de Parede:</label>
+                    <div class="wallpaper-grid">
+                        <!-- Tech / Circuit -->
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=300')" data-src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <!-- Abstract Purple -->
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300')" data-src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <!-- Space / Stars -->
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=300')" data-src="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <!-- Red Mountains -->
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1477346611705-65d1883cee1e?q=80&w=300')" data-src="https://images.unsplash.com/photo-1477346611705-65d1883cee1e?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <!-- Night Sky -->
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=300')" data-src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <!-- Neon City -->
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=300')" data-src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <!-- Landscape -->
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=300')" data-src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                        <!-- Abstract Colorful -->
+                        <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=300')" data-src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
+                    </div>
+                </div>
             </div>
+
             <div id="tab-system" class="tab-content">
-                <div class="setting-group"><label>Ações:</label><button onclick="location.reload()" class="full-width-btn danger-btn"><i class="fa-solid fa-power-off"></i> Reiniciar Sistema</button></div>
+                <div class="setting-group">
+                    <label>Informações do Sistema:</label>
+                    <div class="sys-info">
+                        <p><strong>OS:</strong> NexusOS v2.2</p>
+                        <p><strong>Kernel:</strong> WebKit Hybrid</p>
+                        <p><strong>Memória:</strong> Virtualizada</p>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label>Ações:</label>
+                    <button onclick="location.reload()" class="full-width-btn danger-btn"><i class="fa-solid fa-power-off"></i> Reiniciar Sistema</button>
+                </div>
             </div>
         </div>
     </template>
