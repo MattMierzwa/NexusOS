@@ -4,11 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NexusOS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Roboto:wght@300;400;700&family=Inter:wght@300;400;600&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="theme-dark">
+<body class="theme-dark font-poppins">
+
+    <!-- CURSOR CUSTOMIZADO -->
+    <div id="custom-cursor"></div>
+
+    <!-- BARRA DE PESQUISA -->
+    <div id="search-overlay" class="hidden">
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="global-search-input" placeholder="Buscar apps, arquivos..." oninput="performSearch()">
+                <span class="shortcut-hint">ESC para fechar</span>
+            </div>
+            <div id="search-results"></div>
+        </div>
+    </div>
 
     <!-- TELA DE BOOT -->
     <div id="boot-screen">
@@ -31,8 +46,13 @@
         <div class="desktop-icon" onclick="openApp('weather')"><i class="fa-solid fa-cloud-sun-rain" style="color: #00d2ff;"></i><span>Clima</span></div>
         <div class="desktop-icon" onclick="openApp('browser')"><i class="fa-solid fa-globe" style="color: #ea4335;"></i><span>Navegador</span></div>
         <div class="desktop-icon" onclick="openApp('notepad')"><i class="fa-solid fa-pen-nib" style="color: #fff;"></i><span>Editor</span></div>
+        <div class="desktop-icon" onclick="openApp('codeeditor')"><i class="fa-solid fa-code" style="color: #bb9af7;"></i><span>Code Editor</span></div>
+        <div class="desktop-icon" onclick="openApp('paint')"><i class="fa-solid fa-paintbrush" style="color: #f7768e;"></i><span>Paint</span></div>
+        <div class="desktop-icon" onclick="openApp('calculator')"><i class="fa-solid fa-calculator" style="color: #acadb9;"></i><span>Calculadora</span></div>
+        <div class="desktop-icon" onclick="openApp('music')"><i class="fa-solid fa-music" style="color: #bb9af7;"></i><span>Música</span></div>
         <div class="desktop-icon" onclick="openApp('todo')"><i class="fa-solid fa-check-double" style="color: #00f260;"></i><span>Tarefas</span></div>
         <div class="desktop-icon" onclick="openApp('calendar')"><i class="fa-solid fa-calendar-alt" style="color: #ff416c;"></i><span>Agenda</span></div>
+        <div class="desktop-icon" onclick="openApp('taskmanager')"><i class="fa-solid fa-list-check" style="color: #e0af68;"></i><span>Task Manager</span></div>
         <div class="desktop-icon" onclick="openApp('monitor')"><i class="fa-solid fa-chart-line" style="color: #f7768e;"></i><span>Monitor</span></div>
         <div class="desktop-icon" onclick="openApp('settings')"><i class="fa-solid fa-sliders-h" style="color: #acadb9;"></i><span>Sistema</span></div>
     </div>
@@ -47,8 +67,13 @@
             <div class="start-item" onclick="openApp('weather'); toggleStartMenu()"><i class="fa-solid fa-cloud-sun-rain"></i> Clima</div>
             <div class="start-item" onclick="openApp('browser'); toggleStartMenu()"><i class="fa-solid fa-globe"></i> Navegador</div>
             <div class="start-item" onclick="openApp('notepad'); toggleStartMenu()"><i class="fa-solid fa-pen-nib"></i> Editor</div>
+            <div class="start-item" onclick="openApp('codeeditor'); toggleStartMenu()"><i class="fa-solid fa-code"></i> Code Editor</div>
+            <div class="start-item" onclick="openApp('paint'); toggleStartMenu()"><i class="fa-solid fa-paintbrush"></i> Paint</div>
+            <div class="start-item" onclick="openApp('calculator'); toggleStartMenu()"><i class="fa-solid fa-calculator"></i> Calculadora</div>
+            <div class="start-item" onclick="openApp('music'); toggleStartMenu()"><i class="fa-solid fa-music"></i> Música</div>
             <div class="start-item" onclick="openApp('todo'); toggleStartMenu()"><i class="fa-solid fa-check-double"></i> Tarefas</div>
             <div class="start-item" onclick="openApp('calendar'); toggleStartMenu()"><i class="fa-solid fa-calendar-alt"></i> Agenda</div>
+            <div class="start-item" onclick="openApp('taskmanager'); toggleStartMenu()"><i class="fa-solid fa-list-check"></i> Task Manager</div>
             <div class="start-item" onclick="openApp('monitor'); toggleStartMenu()"><i class="fa-solid fa-chart-line"></i> Monitor</div>
             <div class="start-item" onclick="openApp('settings'); toggleStartMenu()"><i class="fa-solid fa-sliders-h"></i> Sistema</div>
         </div>
@@ -58,6 +83,7 @@
     <!-- BARRA DE TAREFAS -->
     <div id="taskbar">
         <div id="start-btn" onclick="toggleStartMenu()"><svg width="24" height="24" viewBox="0 0 100 100"><path d="M50 10 L85 30 L85 70 L50 90 L15 70 L15 30 Z" fill="var(--accent-color)" stroke="white" stroke-width="5"/></svg></div>
+        <div id="search-btn" onclick="toggleSearch()" style="padding: 0 10px; cursor: pointer;"><i class="fa-solid fa-magnifying-glass"></i></div>
         <div id="taskbar-apps"></div>
         <div id="system-tray">
             <div id="volume-btn" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="vol-icon"></i></div>
@@ -76,51 +102,15 @@
     </div>
 
     <!-- TEMPLATES -->
-    <template id="tpl-explorer">
-        <div class="window-content explorer-layout">
-            <div class="explorer-sidebar">
-                <div class="sidebar-item" onclick="renderFiles('/')"><i class="fa-solid fa-house"></i> Home</div>
-                <div class="sidebar-item" onclick="renderFiles('trash')"><i class="fa-solid fa-trash-can"></i> Lixeira</div>
-                <div class="sidebar-item" onclick="createNewFilePrompt()"><i class="fa-solid fa-plus"></i> Novo Arquivo</div>
-            </div>
-            <div class="explorer-main"></div>
-        </div>
-    </template>
-
-    <template id="tpl-weather">
-        <div class="window-content weather-layout">
-            <div class="weather-search">
-                <input type="text" id="city-input" placeholder="Digite a cidade...">
-                <button onclick="fetchWeather()"><i class="fa-solid fa-search"></i></button>
-            </div>
-            <div id="weather-display" class="weather-info">
-                <div class="loading">Carregando clima...</div>
-            </div>
-        </div>
-    </template>
-
+    <template id="tpl-explorer"><div class="window-content explorer-layout"><div class="explorer-sidebar"><div class="sidebar-item" onclick="navigateTo('/')"><i class="fa-solid fa-house"></i> Home</div><div class="sidebar-item" onclick="navigateToTrash()"><i class="fa-solid fa-trash-can"></i> Lixeira</div><div class="sidebar-divider"></div><div class="sidebar-label">Ações</div><div class="sidebar-item" onclick="createNewFolderPrompt()"><i class="fa-solid fa-folder-plus"></i> Nova Pasta</div><div class="sidebar-item" onclick="createNewFilePrompt()"><i class="fa-solid fa-file-circle-plus"></i> Novo Arquivo</div></div><div class="explorer-main-area"><div class="explorer-nav-bar"><button onclick="goBack()"><i class="fa-solid fa-arrow-left"></i></button><div class="path-display" id="explorer-path">Home</div></div><div class="explorer-main" id="explorer-grid"></div></div></div></template>
+    <template id="tpl-weather"><div class="window-content weather-layout"><div class="weather-search"><input type="text" id="city-input" placeholder="Digite a cidade..."><button onclick="fetchWeather()"><i class="fa-solid fa-search"></i></button></div><div id="weather-display" class="weather-info"><div class="loading">Carregando clima...</div></div></div></template>
     <template id="tpl-browser"><div class="window-content browser-layout"><div class="browser-bar"><button onclick="navWiki('back')"><i class="fa-solid fa-arrow-left"></i></button><input type="text" value="https://pt.wikipedia.org" readonly><button onclick="navWiki('refresh')"><i class="fa-solid fa-redo"></i></button></div><iframe src="https://pt.m.wikipedia.org" id="wiki-frame"></iframe></div></template>
     <template id="tpl-notepad"><div class="window-content notepad-layout"><textarea id="notepad-area" placeholder="Escreva..."></textarea><div class="notepad-controls"><button onclick="saveNotepadContent(this)">Salvar</button><span id="notepad-status">Pronto</span></div></div></template>
+    <template id="tpl-music"><div class="window-content music-layout"><div class="music-player-ui"><div class="music-icon-large"><i class="fa-solid fa-music"></i></div><div class="music-info"><div id="music-title" class="music-title">Selecione uma música</div><div id="music-status" class="music-status">Parado</div></div><audio id="audio-element" controls style="width: 100%; margin-top: 15px;"></audio></div><div class="music-upload-section"><label class="custom-file-upload"><input type="file" id="music-file-input" accept="audio/*" multiple onchange="handleMusicUpload(this)"><i class="fa-solid fa-cloud-arrow-up"></i> Adicionar Músicas</label></div><div class="music-playlist" id="music-playlist"></div></div></template>
     <template id="tpl-todo"><div class="window-content todo-layout"><div class="todo-input-group"><input type="text" id="todo-input" placeholder="Nova tarefa..."><button onclick="addTodo()">Add</button></div><ul id="todo-list"></ul></div></template>
-    <template id="tpl-calculator"><div class="window-content calculator-layout"><input type="text" id="calc-display" readonly><div class="calc-buttons"><button onclick="calcInput('C')">C</button><button onclick="calcInput('/')">/</button><button onclick="calcInput('*')">*</button><button onclick="calcInput('back')">←</button><button onclick="calcInput('7')">7</button><button onclick="calcInput('8')">8</button><button onclick="calcInput('9')">9</button><button onclick="calcInput('-')">-</button><button onclick="calcInput('4')">4</button><button onclick="calcInput('5')">5</button><button onclick="calcInput('6')">6</button><button onclick="calcInput('+')">+</button><button onclick="calcInput('1')">1</button><button onclick="calcInput('2')">2</button><button onclick="calcInput('3')">3</button><button onclick="calcInput('=')" class="btn-equal">=</button><button onclick="calcInput('0')" class="btn-zero">0</button><button onclick="calcInput('.')">.</button></div></div></template>
+    <template id="tpl-calculator"><div class="window-content calculator-layout"><input type="text" id="calc-display" readonly><div class="calc-buttons"><button onclick="calcInput('C')" class="btn-op">C</button><button onclick="calcInput('/')" class="btn-op">/</button><button onclick="calcInput('*')" class="btn-op">*</button><button onclick="calcInput('back')" class="btn-op"><i class="fa-solid fa-delete-left"></i></button><button onclick="calcInput('7')">7</button><button onclick="calcInput('8')">8</button><button onclick="calcInput('9')">9</button><button onclick="calcInput('-')" class="btn-op">-</button><button onclick="calcInput('4')">4</button><button onclick="calcInput('5')">5</button><button onclick="calcInput('6')">6</button><button onclick="calcInput('+')" class="btn-op">+</button><button onclick="calcInput('1')">1</button><button onclick="calcInput('2')">2</button><button onclick="calcInput('3')">3</button><button onclick="calcInput('=')" class="btn-equal" rowspan="2">=</button><button onclick="calcInput('0')" class="btn-zero">0</button><button onclick="calcInput('.')">.</button></div></div></template>
+    <template id="tpl-monitor"><div class="window-content monitor-layout"><div class="monitor-card"><h3>CPU Usage</h3><canvas id="cpu-chart" width="300" height="60"></canvas><span id="cpu-text">0%</span></div><div class="monitor-card"><h3>RAM Usage</h3><canvas id="ram-chart" width="300" height="60"></canvas><span id="ram-text">0%</span></div><div class="process-list" id="process-list"></div></div></template>
     
-    <template id="tpl-monitor">
-        <div class="window-content monitor-layout">
-            <div class="monitor-card">
-                <h3>CPU Usage</h3>
-                <canvas id="cpu-chart" width="300" height="60"></canvas>
-                <span id="cpu-text">0%</span>
-            </div>
-            <div class="monitor-card">
-                <h3>RAM Usage</h3>
-                <canvas id="ram-chart" width="300" height="60"></canvas>
-                <span id="ram-text">0%</span>
-            </div>
-            <div class="process-list" id="process-list"></div>
-        </div>
-    </template>
-
-    <!-- TEMPLATE SETTINGS COMPLETO RESTAURADO -->
     <template id="tpl-settings">
         <div class="window-content settings-layout">
             <div class="settings-tabs">
@@ -132,6 +122,16 @@
                 <div class="setting-group">
                     <label>Tema Base:</label>
                     <button onclick="toggleTheme()" class="full-width-btn"><i class="fa-solid fa-adjust"></i> Alternar Claro / Escuro</button>
+                </div>
+                
+                <div class="setting-group">
+                    <label>Fonte do Sistema:</label>
+                    <select id="font-select" onchange="setSystemFont(this.value)" style="width:100%; padding:8px; background:var(--hover-color); color:var(--text-color); border:1px solid var(--border-color); border-radius:8px;">
+                        <option value="font-poppins">Poppins (Padrão)</option>
+                        <option value="font-roboto">Roboto</option>
+                        <option value="font-inter">Inter</option>
+                        <option value="font-fira">Fira Code (Mono)</option>
+                    </select>
                 </div>
 
                 <div class="setting-group">
@@ -145,31 +145,53 @@
                         <div class="color-option" style="background: #00d2ff;" onclick="setAccentColor('#00d2ff', 'linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)')"></div>
                     </div>
                 </div>
+
+                <div class="setting-group">
+                    <label>Efeitos Visuais:</label>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button onclick="toggleGlowEffect()" id="glow-btn" class="full-width-btn" style="flex:1;"><i class="fa-solid fa-lightbulb"></i> Efeito Glow RGB</button>
+                        <button onclick="toggleCustomCursor()" id="cursor-btn" class="full-width-btn" style="flex:1;"><i class="fa-solid fa-arrow-pointer"></i> Cursor Custom</button>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>Pacote de Sons:</label>
+                    <select id="sound-pack-select" onchange="setSoundPack(this.value)" style="width:100%; padding:8px; background:var(--hover-color); color:var(--text-color); border:1px solid var(--border-color); border-radius:8px;">
+                        <option value="futuristic">Futurista (Padrão)</option>
+                        <option value="classic">Clássico (Suave)</option>
+                        <option value="mechanical">Mecânico (Clicky)</option>
+                        <option value="silent">Silencioso</option>
+                    </select>
+                </div>
                 
                 <div class="setting-group">
-                    <label>Transparência das Janelas:</label>
-                    <input type="range" min="0.5" max="1" step="0.05" value="0.85" id="opacity-slider" oninput="setWindowOpacity(this.value)" style="width:100%">
-                    <small id="opacity-value" style="opacity:0.7; font-size:11px;">85%</small>
+                    <label>Arredondamento das Janelas:</label>
+                    <input type="range" min="0" max="30" step="1" value="15" id="border-radius-slider" oninput="setBorderRadius(this.value)" style="width:100%">
+                    <small id="radius-value" style="opacity:0.7; font-size:11px;">15px</small>
+                </div>
+
+                <div class="setting-group">
+                    <label>Intensidade do Blur (Vidro):</label>
+                    <input type="range" min="0" max="20" step="1" value="10" id="blur-slider" oninput="setBlurIntensity(this.value)" style="width:100%">
+                    <small id="blur-value" style="opacity:0.7; font-size:11px;">10px</small>
+                </div>
+
+                <div class="setting-group">
+                    <label>Escala da Interface:</label>
+                    <input type="range" min="0.8" max="1.2" step="0.05" value="1" id="scale-slider" oninput="setInterfaceScale(this.value)" style="width:100%">
+                    <small id="scale-value" style="opacity:0.7; font-size:11px;">100%</small>
                 </div>
 
                 <div class="setting-group">
                     <label>Papel de Parede:</label>
                     <div class="wallpaper-grid">
-                        <!-- Tech / Circuit -->
                         <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=300')" data-src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
-                        <!-- Abstract Purple -->
                         <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300')" data-src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
-                        <!-- Space / Stars -->
                         <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=300')" data-src="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
-                        <!-- Red Mountains -->
                         <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1477346611705-65d1883cee1e?q=80&w=300')" data-src="https://images.unsplash.com/photo-1477346611705-65d1883cee1e?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
-                        <!-- Night Sky -->
                         <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=300')" data-src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
-                        <!-- Neon City -->
                         <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=300')" data-src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
-                        <!-- Landscape -->
                         <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=300')" data-src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
-                        <!-- Abstract Colorful -->
                         <div class="wp-thumb" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=300')" data-src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1920&auto=format&fit=crop" onclick="setWallpaper(this)"></div>
                     </div>
                 </div>
@@ -179,9 +201,17 @@
                 <div class="setting-group">
                     <label>Informações do Sistema:</label>
                     <div class="sys-info">
-                        <p><strong>OS:</strong> NexusOS v2.2</p>
-                        <p><strong>Kernel:</strong> WebKit Hybrid</p>
-                        <p><strong>Memória:</strong> Virtualizada</p>
+                        <p><strong>OS:</strong> NexusOS v2.6 Custom</p>
+                        <p><strong>Kernel:</strong> WebKit Hybrid Core</p>
+                        <p><strong>Resolução:</strong> <span id="sys-res">Detectando...</span></p>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label>Backup & Restauração:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="downloadBackup()" class="full-width-btn" style="background: var(--success-color); color: white; border:none;"><i class="fa-solid fa-download"></i> Baixar Backup</button>
+                        <button onclick="document.getElementById('restore-input').click()" class="full-width-btn" style="background: var(--accent-color); color: white; border:none;"><i class="fa-solid fa-upload"></i> Restaurar</button>
+                        <input type="file" id="restore-input" style="display: none;" accept=".json" onchange="restoreBackup(this)">
                     </div>
                 </div>
                 <div class="setting-group">
@@ -192,8 +222,12 @@
         </div>
     </template>
 
+    <template id="tpl-imageviewer"><div class="window-content imageviewer-layout"><div class="image-toolbar"><button onclick="zoomImage(0.1)"><i class="fa-solid fa-magnifying-glass-plus"></i></button><button onclick="zoomImage(-0.1)"><i class="fa-solid fa-magnifying-glass-minus"></i></button><button onclick="resetZoom()"><i class="fa-solid fa-compress"></i></button><button onclick="setAsWallpaperFromViewer()" style="margin-left: auto;"><i class="fa-solid fa-image"></i> Papel de Parede</button></div><div class="image-container" id="image-container"><img id="viewer-img" src="" alt="Imagem"></div><div class="image-name" id="image-name-display"></div></div></template>
     <template id="tpl-terminal"><div class="window-content terminal-layout" onclick="refocusTerminal(this)"><div class="terminal-output"></div><div class="terminal-input-line"><span class="prompt">nexus@root:~$</span><input type="text" class="term-input" autocomplete="off" spellcheck="false"></div></div></template>
     <template id="tpl-calendar"><div class="window-content calendar-layout"><div class="cal-header"><button onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button><h3 id="cal-month-year">Mês Ano</h3><button onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button></div><div class="cal-weekdays"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div><div class="cal-days" id="cal-days-grid"></div><div id="event-modal" class="hidden"><div class="modal-content"><h4 id="modal-date-title">Data</h4><textarea id="event-note" placeholder="Lembrete..."></textarea><div class="modal-actions"><button onclick="saveEvent()" class="btn-save">Salvar</button><button onclick="closeEventModal()" class="btn-cancel">Cancelar</button></div></div></div></div></template>
+    <template id="tpl-codeeditor"><div class="window-content code-editor-layout"><div class="code-toolbar"><select id="code-lang"><option value="html">HTML</option><option value="css">CSS</option><option value="js">JavaScript</option></select><button onclick="runCode()"><i class="fa-solid fa-play"></i> Executar</button><button onclick="saveCode()"><i class="fa-solid fa-save"></i> Salvar</button></div><div class="code-container"><div class="code-lines" id="code-lines">1</div><textarea id="code-area" spellcheck="false" oninput="updateLines()"></textarea></div><div class="code-preview-container"><iframe id="code-preview"></iframe></div></div></template>
+    <template id="tpl-paint"><div class="window-content paint-layout"><div class="paint-toolbar"><input type="color" id="paint-color" value="#ffffff"><input type="range" id="paint-size" min="1" max="50" value="5"><button onclick="setTool('brush')"><i class="fa-solid fa-paintbrush"></i></button><button onclick="setTool('eraser')"><i class="fa-solid fa-eraser"></i></button><button onclick="clearCanvas()"><i class="fa-solid fa-trash"></i></button><button onclick="saveCanvas()"><i class="fa-solid fa-download"></i></button></div><div class="paint-canvas-container"><canvas id="paint-canvas"></canvas></div></div></template>
+    <template id="tpl-taskmanager"><div class="window-content task-manager-layout"><div class="tm-header"><h3>Processos Ativos</h3><button onclick="refreshTasks()"><i class="fa-solid fa-rotate-right"></i></button></div><div class="tm-list" id="tm-list"></div><div class="tm-footer"><span id="tm-count">0 processos</span></div></div></template>
 
     <script src="script.js"></script>
 </body>
