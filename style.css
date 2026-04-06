@@ -58,7 +58,7 @@ body {
     transform: scale(var(--interface-scale));
     width: calc(100% / var(--interface-scale));
     height: calc(100% / var(--interface-scale));
-    margin: 0; /* Garante sem margem externa */
+    margin: 0;
     padding: 0;
 }
 
@@ -67,10 +67,10 @@ body {
     position: fixed; 
     top: 0; 
     left: 0; 
-    width: 100vw; /* Garante largura total da viewport */
-    height: 100vh; /* Garante altura total da viewport */
-    background: #050510 !important; /* Força cor escura sólida */
-    z-index: 999999 !important; /* Z-index máximo absoluto */
+    width: 100vw;
+    height: 100vh;
+    background: #050510 !important;
+    z-index: 999999 !important;
     display: flex; 
     justify-content: center; 
     align-items: center; 
@@ -100,7 +100,7 @@ body {
 
 /* --- DESKTOP AJUSTADO --- */
 #desktop { 
-    height: calc(100vh - 50px); /* Altura exata menos a barra fixa */
+    height: calc(100vh - 50px);
     padding: 20px; 
     display: flex; 
     flex-direction: column; 
@@ -109,7 +109,7 @@ body {
     gap: 20px; 
     position: relative;
     z-index: 1;
-    overflow: hidden; /* Evita scroll indesejado */
+    overflow: hidden;
 }
 .desktop-icon { width: 90px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-radius: 12px; transition: all 0.3s; text-align: center; border: 1px solid transparent; }
 .desktop-icon:hover { background: var(--hover-color); border-color: var(--border-color); transform: translateY(-5px); }
@@ -117,12 +117,13 @@ body {
 .desktop-icon span { font-size: 13px; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.8); color: white; }
 body.theme-light .desktop-icon span { color: #333; text-shadow: none; }
 
-/* --- BARRA DE TAREFAS FIXA NA BASE --- */
+/* --- BARRA DE TAREFAS COLADA NA BASE (CORREÇÃO FINAL) --- */
 #taskbar { 
-    position: fixed; /* Fixo na janela do navegador */
-    bottom: 0; 
-    left: 0; 
-    right: 0; 
+    position: fixed; 
+    bottom: 0 !important; /* Força colar na base */
+    left: 0 !important;   /* Força colar na esquerda */
+    right: 0 !important;  /* Força esticar até a direita */
+    width: 100% !important; /* Garante largura total */
     height: 50px; 
     background: var(--taskbar-bg); 
     backdrop-filter: blur(var(--blur-intensity)); 
@@ -130,10 +131,16 @@ body.theme-light .desktop-icon span { color: #333; text-shadow: none; }
     align-items: center; 
     padding: 0 15px; 
     z-index: 1000; 
+    
+    /* REMOVE O ARREDONDAMENTO GERAL PARA ELA FICAR RETA EMBAIXO */
     border-radius: 0; 
+    
+    /* MANTÉM APENAS A BORDA SUPERIOR E SOMBRA PARA DESTACAR */
     border-top: 1px solid var(--border-color); 
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.2); 
-    margin: 0;
+    border-bottom: none;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.3); 
+    
+    margin: 0 !important;
 }
 #start-btn, #search-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; color: var(--text-color); font-size: 20px; }
 #start-btn:hover, #search-btn:hover { transform: scale(1.1); color: var(--accent-color); }
@@ -146,7 +153,7 @@ body.theme-light .desktop-icon span { color: #333; text-shadow: none; }
 
 /* START MENU AJUSTADO */
 #start-menu { 
-    position: fixed; /* Fixo para acompanhar a viewport */
+    position: fixed;
     bottom: 60px; 
     left: 10px; 
     width: 320px; 
