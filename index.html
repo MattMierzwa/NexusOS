@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusOS</title>
+    <title>NexusOS - Sistema Operacional Web</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Roboto:wght@300;400;700&family=Inter:wght@300;400;600&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,7 +18,7 @@
         <div class="search-container">
             <div class="search-input-wrapper">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="global-search-input" placeholder="Buscar apps, arquivos..." oninput="performSearch()">
+                <input type="text" id="global-search-input" placeholder="Buscar apps, arquivos..." oninput="AppController.search.perform()">
                 <span class="shortcut-hint">ESC para fechar</span>
             </div>
             <div id="search-results"></div>
@@ -42,19 +42,19 @@
 
     <!-- DESKTOP -->
     <div id="desktop">
-        <div class="desktop-icon" onclick="openApp('explorer')"><i class="fa-solid fa-folder-tree" style="color: #ffd700;"></i><span>Explorador</span></div>
-        <div class="desktop-icon" onclick="openApp('weather')"><i class="fa-solid fa-cloud-sun-rain" style="color: #00d2ff;"></i><span>Clima</span></div>
-        <div class="desktop-icon" onclick="openApp('browser')"><i class="fa-solid fa-globe" style="color: #ea4335;"></i><span>Navegador</span></div>
-        <div class="desktop-icon" onclick="openApp('notepad')"><i class="fa-solid fa-pen-nib" style="color: #fff;"></i><span>Editor</span></div>
-        <div class="desktop-icon" onclick="openApp('codeeditor')"><i class="fa-solid fa-code" style="color: #bb9af7;"></i><span>Code Editor</span></div>
-        <div class="desktop-icon" onclick="openApp('paint')"><i class="fa-solid fa-paintbrush" style="color: #f7768e;"></i><span>Paint</span></div>
-        <div class="desktop-icon" onclick="openApp('calculator')"><i class="fa-solid fa-calculator" style="color: #acadb9;"></i><span>Calculadora</span></div>
-        <div class="desktop-icon" onclick="openApp('music')"><i class="fa-solid fa-music" style="color: #bb9af7;"></i><span>Música</span></div>
-        <div class="desktop-icon" onclick="openApp('todo')"><i class="fa-solid fa-check-double" style="color: #00f260;"></i><span>Tarefas</span></div>
-        <div class="desktop-icon" onclick="openApp('calendar')"><i class="fa-solid fa-calendar-alt" style="color: #ff416c;"></i><span>Agenda</span></div>
-        <div class="desktop-icon" onclick="openApp('taskmanager')"><i class="fa-solid fa-list-check" style="color: #e0af68;"></i><span>Task Manager</span></div>
-        <div class="desktop-icon" onclick="openApp('monitor')"><i class="fa-solid fa-chart-line" style="color: #f7768e;"></i><span>Monitor</span></div>
-        <div class="desktop-icon" onclick="openApp('settings')"><i class="fa-solid fa-sliders-h" style="color: #acadb9;"></i><span>Sistema</span></div>
+        <div class="desktop-icon" onclick="AppController.open('explorer')"><i class="fa-solid fa-folder-tree" style="color: #ffd700;"></i><span>Explorador</span></div>
+        <div class="desktop-icon" onclick="AppController.open('weather')"><i class="fa-solid fa-cloud-sun-rain" style="color: #00d2ff;"></i><span>Clima</span></div>
+        <div class="desktop-icon" onclick="AppController.open('browser')"><i class="fa-solid fa-globe" style="color: #ea4335;"></i><span>Navegador</span></div>
+        <div class="desktop-icon" onclick="AppController.open('notepad')"><i class="fa-solid fa-pen-nib" style="color: #fff;"></i><span>Editor</span></div>
+        <div class="desktop-icon" onclick="AppController.open('codeeditor')"><i class="fa-solid fa-code" style="color: #bb9af7;"></i><span>Code Editor</span></div>
+        <div class="desktop-icon" onclick="AppController.open('paint')"><i class="fa-solid fa-paintbrush" style="color: #f7768e;"></i><span>Paint</span></div>
+        <div class="desktop-icon" onclick="AppController.open('calculator')"><i class="fa-solid fa-calculator" style="color: #acadb9;"></i><span>Calculadora</span></div>
+        <div class="desktop-icon" onclick="AppController.open('music')"><i class="fa-solid fa-music" style="color: #bb9af7;"></i><span>Música</span></div>
+        <div class="desktop-icon" onclick="AppController.open('todo')"><i class="fa-solid fa-check-double" style="color: #00f260;"></i><span>Tarefas</span></div>
+        <div class="desktop-icon" onclick="AppController.open('calendar')"><i class="fa-solid fa-calendar-alt" style="color: #ff416c;"></i><span>Agenda</span></div>
+        <div class="desktop-icon" onclick="AppController.open('taskmanager')"><i class="fa-solid fa-list-check" style="color: #e0af68;"></i><span>Task Manager</span></div>
+        <div class="desktop-icon" onclick="AppController.open('monitor')"><i class="fa-solid fa-chart-line" style="color: #f7768e;"></i><span>Monitor</span></div>
+        <div class="desktop-icon" onclick="AppController.open('settings')"><i class="fa-solid fa-sliders-h" style="color: #acadb9;"></i><span>Sistema</span></div>
     </div>
 
     <!-- MENU INICIAR -->
@@ -63,30 +63,30 @@
             <div class="user-profile"><div class="avatar-circle">N</div><span>Usuário Nexus</span></div>
         </div>
         <div class="start-apps">
-            <div class="start-item" onclick="openApp('explorer'); toggleStartMenu()"><i class="fa-solid fa-folder-tree"></i> Explorador</div>
-            <div class="start-item" onclick="openApp('weather'); toggleStartMenu()"><i class="fa-solid fa-cloud-sun-rain"></i> Clima</div>
-            <div class="start-item" onclick="openApp('browser'); toggleStartMenu()"><i class="fa-solid fa-globe"></i> Navegador</div>
-            <div class="start-item" onclick="openApp('notepad'); toggleStartMenu()"><i class="fa-solid fa-pen-nib"></i> Editor</div>
-            <div class="start-item" onclick="openApp('codeeditor'); toggleStartMenu()"><i class="fa-solid fa-code"></i> Code Editor</div>
-            <div class="start-item" onclick="openApp('paint'); toggleStartMenu()"><i class="fa-solid fa-paintbrush"></i> Paint</div>
-            <div class="start-item" onclick="openApp('calculator'); toggleStartMenu()"><i class="fa-solid fa-calculator"></i> Calculadora</div>
-            <div class="start-item" onclick="openApp('music'); toggleStartMenu()"><i class="fa-solid fa-music"></i> Música</div>
-            <div class="start-item" onclick="openApp('todo'); toggleStartMenu()"><i class="fa-solid fa-check-double"></i> Tarefas</div>
-            <div class="start-item" onclick="openApp('calendar'); toggleStartMenu()"><i class="fa-solid fa-calendar-alt"></i> Agenda</div>
-            <div class="start-item" onclick="openApp('taskmanager'); toggleStartMenu()"><i class="fa-solid fa-list-check"></i> Task Manager</div>
-            <div class="start-item" onclick="openApp('monitor'); toggleStartMenu()"><i class="fa-solid fa-chart-line"></i> Monitor</div>
-            <div class="start-item" onclick="openApp('settings'); toggleStartMenu()"><i class="fa-solid fa-sliders-h"></i> Sistema</div>
+            <div class="start-item" onclick="AppController.open('explorer'); UI.toggleStartMenu()"><i class="fa-solid fa-folder-tree"></i> Explorador</div>
+            <div class="start-item" onclick="AppController.open('weather'); UI.toggleStartMenu()"><i class="fa-solid fa-cloud-sun-rain"></i> Clima</div>
+            <div class="start-item" onclick="AppController.open('browser'); UI.toggleStartMenu()"><i class="fa-solid fa-globe"></i> Navegador</div>
+            <div class="start-item" onclick="AppController.open('notepad'); UI.toggleStartMenu()"><i class="fa-solid fa-pen-nib"></i> Editor</div>
+            <div class="start-item" onclick="AppController.open('codeeditor'); UI.toggleStartMenu()"><i class="fa-solid fa-code"></i> Code Editor</div>
+            <div class="start-item" onclick="AppController.open('paint'); UI.toggleStartMenu()"><i class="fa-solid fa-paintbrush"></i> Paint</div>
+            <div class="start-item" onclick="AppController.open('calculator'); UI.toggleStartMenu()"><i class="fa-solid fa-calculator"></i> Calculadora</div>
+            <div class="start-item" onclick="AppController.open('music'); UI.toggleStartMenu()"><i class="fa-solid fa-music"></i> Música</div>
+            <div class="start-item" onclick="AppController.open('todo'); UI.toggleStartMenu()"><i class="fa-solid fa-check-double"></i> Tarefas</div>
+            <div class="start-item" onclick="AppController.open('calendar'); UI.toggleStartMenu()"><i class="fa-solid fa-calendar-alt"></i> Agenda</div>
+            <div class="start-item" onclick="AppController.open('taskmanager'); UI.toggleStartMenu()"><i class="fa-solid fa-list-check"></i> Task Manager</div>
+            <div class="start-item" onclick="AppController.open('monitor'); UI.toggleStartMenu()"><i class="fa-solid fa-chart-line"></i> Monitor</div>
+            <div class="start-item" onclick="AppController.open('settings'); UI.toggleStartMenu()"><i class="fa-solid fa-sliders-h"></i> Sistema</div>
         </div>
         <div class="start-footer"><button onclick="location.reload()"><i class="fa-solid fa-power-off"></i> Reiniciar</button></div>
     </div>
 
     <!-- BARRA DE TAREFAS -->
     <div id="taskbar">
-        <div id="start-btn" onclick="toggleStartMenu()"><svg width="24" height="24" viewBox="0 0 100 100"><path d="M50 10 L85 30 L85 70 L50 90 L15 70 L15 30 Z" fill="var(--accent-color)" stroke="white" stroke-width="5"/></svg></div>
-        <div id="search-btn" onclick="toggleSearch()" style="padding: 0 10px; cursor: pointer;"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <div id="start-btn" onclick="UI.toggleStartMenu()"><svg width="24" height="24" viewBox="0 0 100 100"><path d="M50 10 L85 30 L85 70 L50 90 L15 70 L15 30 Z" fill="var(--accent-color)" stroke="white" stroke-width="5"/></svg></div>
+        <div id="search-btn" onclick="UI.toggleSearch()" style="padding: 0 10px; cursor: pointer;"><i class="fa-solid fa-magnifying-glass"></i></div>
         <div id="taskbar-apps"></div>
         <div id="system-tray">
-            <div id="volume-btn" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="vol-icon"></i></div>
+            <div id="volume-btn" onclick="SoundEngine.toggleMute()"><i class="fa-solid fa-volume-high" id="vol-icon"></i></div>
             <div id="clock"><div id="time">00:00</div><div id="date">01/01</div></div>
         </div>
     </div>
@@ -95,10 +95,10 @@
 
     <!-- MENU DE CONTEXTO -->
     <div id="context-menu" class="hidden">
-        <div class="ctx-item" onclick="refreshDesktop()"><i class="fa-solid fa-sync"></i> Atualizar</div>
+        <div class="ctx-item" onclick="UI.refreshDesktop()"><i class="fa-solid fa-sync"></i> Atualizar</div>
         <div class="ctx-divider"></div>
-        <div class="ctx-item" onclick="openApp('settings')"><i class="fa-solid fa-image"></i> Personalização</div>
-        <div class="ctx-item" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i> Modo Noturno</div>
+        <div class="ctx-item" onclick="AppController.open('settings')"><i class="fa-solid fa-image"></i> Personalização</div>
+        <div class="ctx-item" onclick="System.toggleTheme()"><i class="fa-solid fa-moon"></i> Modo Noturno</div>
     </div>
 
     <!-- TEMPLATES (Mantidos iguais ao seu código anterior, pois estavam corretos) -->
